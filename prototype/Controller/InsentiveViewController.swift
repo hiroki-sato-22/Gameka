@@ -1,58 +1,45 @@
 //
-//  ListViewController.swift
+//  InsentiveViewController.swift
 //  prototype
 //
-//  Created by hiroki sato on 2021/07/17.
+//  Created by hiroki sato on 2021/07/16.
 //
 
 import UIKit
 import RealmSwift
 import Instructions
 
-class ListViewController: UIViewController,UITextFieldDelegate,UITableViewDelegate,UITableViewDataSource {
+class InsentiveViewController: UIViewController,UITableViewDelegate,UITableViewDataSource {
     
-    @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var totalPointDisplay: UIBarButtonItem!
-    @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var addButton: UIBarButtonItem!
+    @IBOutlet weak var pointLabel: UIBarButtonItem!
+    @IBOutlet weak var tableView: UITableView!
     
     let coachMarksController = CoachMarksController()
-    var currentPoint = 0
-    var toDoItems: Results<Item>?
     let realm = try! Realm()
-    var selectedCategory: Category? {
-        didSet {
-            loadItems()
-        }
-    }
+    var insentives: Results<Insentive>?
+    var currentPoint = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        loadCategories()
+        tableView.rowHeight = 80.0
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.rowHeight = 80.0
         tableView.register(UINib(nibName: "CustomViewCell", bundle: nil), forCellReuseIdentifier: "customCell")
         tableView.separatorStyle = .none
+        
         NotificationCenter.default.addObserver(self, selector: #selector(loadList), name: NSNotification.Name(rawValue: "load"), object: nil)
         self.coachMarksController.dataSource = self
+        
         firstLaunch()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        //pointLabelに表示
+        
         let savedNumber = UserDefaults.standard.integer(forKey: "currentValue")
-        totalPointDisplay.title = String(savedNumber)
-    }
-    
-    func firstLaunch() {
-        let launchList = UserDefaults.standard.bool(forKey: "launchList")
-        if launchList == true {
-            return
-        } else {
-            UserDefaults.standard.set(true, forKey: "launchList")
-            self.coachMarksController.start(in: .window(over: self))
-        }
+        pointLabel.title = String(savedNumber)
     }
     
     @objc func loadList(notification: NSNotification){
@@ -60,28 +47,36 @@ class ListViewController: UIViewController,UITextFieldDelegate,UITableViewDelega
         self.tableView.reloadData()
     }
     
+    
+    
+    func firstLaunch() {
+        let launchInsentive = UserDefaults.standard.bool(forKey: "launchInsentive")
+        if launchInsentive == true {
+            return
+        } else {
+            UserDefaults.standard.set(true, forKey: "launchInsentive")
+            self.coachMarksController.start(in: .window(over: self))
+        }
+    }
+    
     // MARK: - tableView
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return toDoItems?.count ?? 1
+        return insentives?.count ?? 1
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = self.tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! CustomViewCell
-        
-        if let item = toDoItems?[indexPath.row] {
-            cell.label.text = item.title
-            cell.pointLabel.text = String(item.getPoint)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! CustomViewCell
+        if let item = insentives?[indexPath.row] {
             
-        } else {
-            cell.textLabel?.text = "No Items Added"
+            cell.label.text = item.title
+            cell.pointLabel.text = String(item.point)
         }
         
         return cell
+        
     }
     
-    
-    //Mark - TableView Delegate Methods
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         showDeleteWarning(for: indexPath)
@@ -90,7 +85,6 @@ class ListViewController: UIViewController,UITextFieldDelegate,UITableViewDelega
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
-    
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == UITableViewCell.EditingStyle.delete {
             updateModel(at: indexPath)
@@ -98,29 +92,25 @@ class ListViewController: UIViewController,UITextFieldDelegate,UITableViewDelega
         }
     }
     
+    // MARK: - data
     func Calculation(for indexPath: IndexPath) {
         //currentPointに値を入れる
-        if let item = toDoItems?[indexPath.row] {
+        if let item = insentives?[indexPath.row] {
             
             let savedNumber = UserDefaults.standard.integer(forKey: "currentValue")
             
-            currentPoint = savedNumber + item.getPoint
+            currentPoint = savedNumber - item.point
             
         }
         //currentPointをuserDefalutsに保存
         UserDefaults.standard.set(currentPoint, forKey: "currentValue")
         //currentPointをnavBarに表示
         let savedNumber = UserDefaults.standard.integer(forKey: "currentValue")
-        totalPointDisplay.title = String(savedNumber)
-    }
-    
-    // MARK: - data
-    func loadItems() {
-        toDoItems = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
+        pointLabel.title = String(savedNumber)
     }
     
     func updateModel(at indexPath: IndexPath) {
-        if let item = toDoItems?[indexPath.row] {
+        if let item = insentives?[indexPath.row] {
             do {
                 try realm.write{
                     realm.delete(item)
@@ -131,70 +121,62 @@ class ListViewController: UIViewController,UITextFieldDelegate,UITableViewDelega
         }
     }
     
+    
+    func save(insentive: Insentive) {
+        do {
+            try realm.write {
+                realm.add(insentive)
+            }
+        } catch {
+            print("Error saving category \(error)")
+        }
+        tableView.reloadData()
+    }
+    
+    func loadCategories() {
+        
+        insentives = realm.objects(Insentive.self)
+        tableView.reloadData()
+    }
+    
     // MARK: - alert
     func showDeleteWarning(for indexPath: IndexPath) {
         //Create the alert controller and actions
-        let alert = UIAlertController(title: "タスクを完了しますか？", message: "OKを選択するとポイントが加算されます", preferredStyle: .alert)
+        let alert = UIAlertController(title: "インセンティブを実行しますか？", message: "OKを選択すると所持ポイントから減算されます", preferredStyle: .alert)
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-        let okAction = UIAlertAction(title: "OK", style: .destructive) { _ in
+        let deleteAction = UIAlertAction(title: "OK", style: .destructive) { _ in
             DispatchQueue.main.async {
+                //削除メソッド
                 self.Calculation(for: indexPath)
             }
         }
         //Add the actions to the alert controller
         alert.addAction(cancelAction)
-        alert.addAction(okAction)
+        alert.addAction(deleteAction)
         
         //Present the alert controller
         present(alert, animated: true, completion: nil)
         
     }
     
+    
+    
+    
+    
+    
     // MARK: - action
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
-        
-        performSegue(withIdentifier: "goToEditSmallTasks", sender: nil)
+        performSegue(withIdentifier: "goToEditInsentives", sender: nil)
     }
+    
     @IBAction func pointPressed(_ sender: Any) {
         performSegue(withIdentifier: "goToEditPoint", sender: nil)
-    }
-    
-    // MARK: - segue
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "goToEditSmallTasks" {
-            
-            let nav = segue.destination as! UINavigationController
-            
-            let destinationVC = nav.topViewController as! EditTaskViewController
-            destinationVC.selectedCategory = self.selectedCategory
-        }
-    }
-    
-    
-}
-
-
-// MARK: - searchBar
-extension ListViewController: UISearchBarDelegate{
-    
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        toDoItems = toDoItems?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "title", ascending: true)
-        tableView.reloadData()
-    }
-    
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        if searchBar.text?.count == 0 {
-            loadItems()
-            DispatchQueue.main.async {
-                searchBar.resignFirstResponder()
-            }
-        }
     }
     
 }
 
 // MARK: - instructions
-extension ListViewController: CoachMarksControllerDataSource, CoachMarksControllerDelegate {
+extension InsentiveViewController: CoachMarksControllerDataSource, CoachMarksControllerDelegate {
     func coachMarksController(_ coachMarksController: CoachMarksController, coachMarkViewsAt index: Int, madeFrom coachMark: CoachMark) -> (bodyView: (UIView & CoachMarkBodyView), arrowView: (UIView & CoachMarkArrowView)?) {
         
         let coachViews = coachMarksController.helper.makeDefaultCoachViews(
@@ -202,15 +184,17 @@ extension ListViewController: CoachMarksControllerDataSource, CoachMarksControll
             arrowOrientation: coachMark.arrowOrientation
         )
         
+        
         switch index {
         case 0:
-            coachViews.bodyView.hintLabel.text = "このボタンで目標達成までに行なうスモールタスクを設定できます"
+            coachViews.bodyView.hintLabel.text = "このボタンでタスクを完了した時の自分へのご褒美を設定できます"
             coachViews.bodyView.nextLabel.text = "OK"
             
         default:
             break
             
         }
+        
         
         return (bodyView: coachViews.bodyView, arrowView: coachViews.arrowView)
     }
@@ -231,4 +215,3 @@ extension ListViewController: CoachMarksControllerDataSource, CoachMarksControll
     
     
 }
-

@@ -1,54 +1,93 @@
 //
 //  CategoryViewController.swift
-//  Todoey
+//  prototype
 //
-//  Created by Philipp Muellauer on 28/11/2019.
-//  Copyright © 2019 Philipp Muellauer. All rights reserved.
+//  Created by hiroki sato on 2021/07/17.
+//
 
 import UIKit
 import RealmSwift
+import Instructions
 
-class CategoryViewController: SwipeTableViewController {
+class CategoryViewController: UIViewController,UITableViewDelegate,UITableViewDataSource{
+    
+    @IBOutlet weak var pointLabel: UIBarButtonItem!
+    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var addGoal: UIBarButtonItem!
     
     let realm = try! Realm()
-    
-    // Potential namespace clash with OpaquePointer (same name of Category)
-    // Use correct type from dropdown or add backticks to fix e.g., var categories = [`Category`]()
+    var titleString: String?
     var categories: Results<Category>?
+    let coachMarksController = CoachMarksController()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        tableView.delegate = self
+        tableView.dataSource = self
         loadCategories()
         tableView.separatorStyle = .none
+        tableView.rowHeight = 80
+        tableView.register(UINib(nibName: "CustomViewCell", bundle: nil), forCellReuseIdentifier: "customCell")
+        NotificationCenter.default.addObserver(self, selector: #selector(loadList), name: NSNotification.Name(rawValue: "load"), object: nil)
+        self.coachMarksController.dataSource = self
+        firstLaunch()
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        guard let navBar = navigationController?.navigationBar else { fatalError("Navigation controller does not exist.")
-        }
-//        navBar.backgroundColor = UIColor(hexString: "#1D9BF6")
+        super.viewWillAppear(animated)
+        //pointLabelに表示
+        let savedNumber = UserDefaults.standard.integer(forKey: "currentValue")
+        pointLabel.title = String(savedNumber)
     }
     
-    //Mark: - Tableview Datasource Methods
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func firstLaunch() {
+        let launchCategory = UserDefaults.standard.bool(forKey: "launchCategory")
+        if launchCategory == true {
+            return
+        } else {
+            UserDefaults.standard.set(true, forKey: "launchCategory")
+            self.coachMarksController.start(in: .window(over: self))
+        }
+    }
+    
+    
+    
+    @objc func loadList(notification: NSNotification){
+        //load data here
+        self.tableView.reloadData()
+    }
+    
+    
+    // MARK: - tableView
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return categories?.count ?? 1
     }
     
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = super.tableView(tableView, cellForRowAt: indexPath)
-        cell.textLabel?.text = categories?[indexPath.row].name ?? "No Categories added yet"
+        let cell = self.tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! CustomViewCell
+        cell.label.text = categories?[indexPath.row].name ?? "No Categories added yet"
+        cell.pointLabel.isHidden = true
         
-//        if let category = categories?[indexPath.row] {
-//            guard let categoryColour = UIColor(hexString: category.colour) else {fatalError()}
-//            cell.backgroundColor = categoryColour
-//            cell.textLabel?.textColor = ContrastColorOf(categoryColour, returnFlat: true)
-//        }
         return cell
     }
     
     
-    //Mark: - Data Manipulation Methods
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        titleString = categories?[indexPath.row].name
+        performSegue(withIdentifier: "goToItems", sender: self)
+    }
+    
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == UITableViewCell.EditingStyle.delete {
+            updateModel(at: indexPath)
+            tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.automatic)
+        }
+    }
+    
+    // MARK: - data
     func save(category: Category) {
         do {
             try realm.write {
@@ -66,8 +105,7 @@ class CategoryViewController: SwipeTableViewController {
         tableView.reloadData()
     }
     
-    //Mark: - Delete Data from Swipe
-    override func updateModel(at indexPath: IndexPath) {
+    func updateModel(at indexPath: IndexPath) {
         if let categoryForDeletion = self.categories?[indexPath.row] {
             do {
                 try self.realm.write {
@@ -79,38 +117,70 @@ class CategoryViewController: SwipeTableViewController {
         }
     }
     
-    //Mark: - Add New Categories
-    @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
-        
-        var textField = UITextField()
-        let alert = UIAlertController(title: "Add a New Cateogry", message: "", preferredStyle: .alert)
-        let action = UIAlertAction(title: "Add", style: .default) { (action) in
-            let newCategory = Category()
-            newCategory.name = textField.text!
-//            newCategory.colour = UIColor.randomFlat().hexValue()
-            self.save(category: newCategory)
-        }
-        
-        alert.addAction(action)
-        alert.addTextField { (field) in
-            textField = field
-            textField.placeholder = "Add a new category"
-        }
-        present(alert, animated: true, completion: nil)
+    // MARK: - action
+    @IBAction func addButton(_ sender: Any) {
+        performSegue(withIdentifier: "goToEdit", sender: nil)
     }
     
-    //Mark: - Tableview Delegate Methods
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        performSegue(withIdentifier: "goToItems", sender: self)
+    @IBAction func pointPressed(_ sender: Any) {
+        performSegue(withIdentifier: "goToEditPoint", sender: nil)
     }
     
+    // MARK: - segue
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        let destinationVC = segue.destination as! TodoListViewController
-        if let indexPath = tableView.indexPathForSelectedRow {
-            destinationVC.selectedCategory = categories?[indexPath.row]
+        
+        if segue.identifier == "goToItems" {
+            let destinationVC = segue.destination as! ListViewController
+            if let indexPath = tableView.indexPathForSelectedRow {
+                destinationVC.selectedCategory = categories?[indexPath.row]
+            }
+            destinationVC.title = titleString
         }
     }
     
+    
+}
+
+// MARK: - instructions
+extension CategoryViewController: CoachMarksControllerDataSource, CoachMarksControllerDelegate {
+    func coachMarksController(_ coachMarksController: CoachMarksController, coachMarkViewsAt index: Int, madeFrom coachMark: CoachMark) -> (bodyView: (UIView & CoachMarkBodyView), arrowView: (UIView & CoachMarkArrowView)?) {
+        
+        let coachViews = coachMarksController.helper.makeDefaultCoachViews(
+            withArrow: true,
+            arrowOrientation: coachMark.arrowOrientation
+        )
+        
+        switch index {
+        case 0:
+            coachViews.bodyView.hintLabel.text = "このボタンで目標を追加できます"
+            coachViews.bodyView.nextLabel.text = "OK"
+            
+        case 1:
+            coachViews.bodyView.hintLabel.text = "数字をタップすると所持ポイントを編集できます"
+            coachViews.bodyView.nextLabel.text = "OK"
+            
+        default:
+            break
+            
+        }
+        
+        return (bodyView: coachViews.bodyView, arrowView: coachViews.arrowView)
+    }
+    
+    
+    func coachMarksController(_ coachMarksController: CoachMarksController, coachMarkAt index: Int) -> CoachMark {
+        
+        let highlightViews: Array<UIView> = [
+            addGoal.value(forKey: "view") as! UIView,
+            pointLabel.value(forKey: "view") as! UIView,
+        ]
+        
+        return coachMarksController.helper.makeCoachMark(for: highlightViews[index])
+    }
+    
+    func numberOfCoachMarks(for coachMarksController: CoachMarksController) -> Int {
+        return 2
+    }
     
     
 }
