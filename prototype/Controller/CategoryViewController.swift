@@ -40,6 +40,7 @@ class CategoryViewController: UIViewController,UITableViewDelegate,UITableViewDa
         pointLabel.title = String(savedNumber)
     }
     
+    
     func firstLaunch() {
         let launchCategory = UserDefaults.standard.bool(forKey: "launchCategory")
         if launchCategory == true {
