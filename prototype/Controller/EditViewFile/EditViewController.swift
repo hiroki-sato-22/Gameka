@@ -12,7 +12,6 @@ class EditViewController: UIViewController {
     
     @IBOutlet weak var textField: UITextField!
     @IBOutlet weak var backView: UIView!
-    @IBOutlet weak var backView2: UIView!
     
     let realm = try! Realm()
     var categories: Results<Category>?
@@ -20,7 +19,6 @@ class EditViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         backView.layer.cornerRadius = 10
-        backView2.layer.cornerRadius = 10
     }
     
     // MARK: - data

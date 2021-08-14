@@ -8,7 +8,7 @@
 import UIKit
 import RealmSwift
 
-class EditInsentiveViewController: UIViewController,UIPickerViewDelegate,UIPickerViewDataSource {
+class EditInsentiveViewController: UIViewController {
 
     @IBOutlet weak var backView: UIView!
     @IBOutlet weak var goalTextField: UITextField!
@@ -29,22 +29,7 @@ class EditInsentiveViewController: UIViewController,UIPickerViewDelegate,UIPicke
         backView.layer.cornerRadius = 10
     }
     
-    // MARK: - pickerView
-    func numberOfComponents(in pickerView: UIPickerView) -> Int {
-        return 1
-    }
     
-    func pickerView( _ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return dataList.count
-    }
-    
-    func pickerView( _ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        return String(dataList[row])
-    }
-    
-    func pickerView( _ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        textField.text = String(dataList[row])
-    }
     
     // MARK: - data
     func save(insentive: Insentive) {
@@ -99,4 +84,23 @@ class EditInsentiveViewController: UIViewController,UIPickerViewDelegate,UIPicke
     
 }
 
+// MARK: - pickerView
+extension EditInsentiveViewController: UIPickerViewDelegate,UIPickerViewDataSource {
+   
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    
+    func pickerView( _ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return dataList.count
+    }
+    
+    func pickerView( _ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return String(dataList[row])
+    }
+    
+    func pickerView( _ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        textField.text = String(dataList[row])
+    }
+}
 

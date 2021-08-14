@@ -9,7 +9,7 @@ import UIKit
 import RealmSwift
 import Instructions
 
-class CategoryViewController: UIViewController,UITableViewDelegate,UITableViewDataSource{
+class CategoryViewController: UIViewController{
     
     @IBOutlet weak var pointLabel: UIBarButtonItem!
     @IBOutlet weak var tableView: UITableView!
@@ -22,15 +22,11 @@ class CategoryViewController: UIViewController,UITableViewDelegate,UITableViewDa
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        tableView.delegate = self
-        tableView.dataSource = self
         loadCategories()
-        tableView.separatorStyle = .none
-        tableView.rowHeight = 80
-        tableView.register(UINib(nibName: "CustomViewCell", bundle: nil), forCellReuseIdentifier: "customCell")
-        NotificationCenter.default.addObserver(self, selector: #selector(loadList), name: NSNotification.Name(rawValue: "load"), object: nil)
         self.coachMarksController.dataSource = self
         firstLaunch()
+        setTableView()
+        NotificationCenter.default.addObserver(self, selector: #selector(loadList), name: NSNotification.Name(rawValue: "load"), object: nil)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -38,6 +34,14 @@ class CategoryViewController: UIViewController,UITableViewDelegate,UITableViewDa
         //pointLabelに表示
         let savedNumber = UserDefaults.standard.integer(forKey: "currentValue")
         pointLabel.title = String(savedNumber)
+    }
+    
+    func setTableView() {
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.separatorStyle = .none
+        tableView.rowHeight = 80
+        tableView.register(UINib(nibName: "CustomViewCell", bundle: nil), forCellReuseIdentifier: "customCell")
     }
     
     
@@ -51,42 +55,11 @@ class CategoryViewController: UIViewController,UITableViewDelegate,UITableViewDa
         }
     }
     
-    
-    
     @objc func loadList(notification: NSNotification){
         //load data here
         self.tableView.reloadData()
     }
-    
-    
-    // MARK: - tableView
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categories?.count ?? 1
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
-        let cell = self.tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! CustomViewCell
-        cell.label.text = categories?[indexPath.row].name ?? "No Categories added yet"
-        cell.pointLabel.isHidden = true
-        
-        return cell
-    }
-    
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
-        titleString = categories?[indexPath.row].name
-        performSegue(withIdentifier: "goToItems", sender: self)
-    }
-    
-    
-    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == UITableViewCell.EditingStyle.delete {
-            updateModel(at: indexPath)
-            tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.automatic)
-        }
-    }
+  
     
     // MARK: - data
     func save(category: Category) {
@@ -140,6 +113,38 @@ class CategoryViewController: UIViewController,UITableViewDelegate,UITableViewDa
     }
     
     
+}
+
+// MARK: - tableView delegate
+extension CategoryViewController: UITableViewDelegate,UITableViewDataSource {
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return categories?.count ?? 1
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        let cell = self.tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! CustomViewCell
+        cell.label.text = categories?[indexPath.row].name ?? "No Categories added yet"
+        cell.pointLabel.isHidden = true
+        
+        return cell
+    }
+    
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        titleString = categories?[indexPath.row].name
+        performSegue(withIdentifier: "goToItems", sender: self)
+    }
+    
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == UITableViewCell.EditingStyle.delete {
+            updateModel(at: indexPath)
+            tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.automatic)
+        }
+    }
 }
 
 // MARK: - instructions

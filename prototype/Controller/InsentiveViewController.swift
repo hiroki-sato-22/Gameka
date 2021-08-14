@@ -9,7 +9,7 @@ import UIKit
 import RealmSwift
 import Instructions
 
-class InsentiveViewController: UIViewController,UITableViewDelegate,UITableViewDataSource {
+class InsentiveViewController: UIViewController {
     
     @IBOutlet weak var addButton: UIBarButtonItem!
     @IBOutlet weak var pointLabel: UIBarButtonItem!
@@ -23,12 +23,7 @@ class InsentiveViewController: UIViewController,UITableViewDelegate,UITableViewD
     override func viewDidLoad() {
         super.viewDidLoad()
         loadCategories()
-        tableView.rowHeight = 80.0
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.register(UINib(nibName: "CustomViewCell", bundle: nil), forCellReuseIdentifier: "customCell")
-        tableView.separatorStyle = .none
-        
+        setTableView()
         NotificationCenter.default.addObserver(self, selector: #selector(loadList), name: NSNotification.Name(rawValue: "load"), object: nil)
         self.coachMarksController.dataSource = self
         
@@ -40,6 +35,14 @@ class InsentiveViewController: UIViewController,UITableViewDelegate,UITableViewD
         
         let savedNumber = UserDefaults.standard.integer(forKey: "currentValue")
         pointLabel.title = String(savedNumber)
+    }
+    
+    func setTableView() {
+        tableView.rowHeight = 80.0
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.register(UINib(nibName: "CustomViewCell", bundle: nil), forCellReuseIdentifier: "customCell")
+        tableView.separatorStyle = .none
     }
     
     @objc func loadList(notification: NSNotification){
@@ -58,39 +61,7 @@ class InsentiveViewController: UIViewController,UITableViewDelegate,UITableViewD
             self.coachMarksController.start(in: .window(over: self))
         }
     }
-    
-    // MARK: - tableView
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return insentives?.count ?? 1
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
-        let cell = tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! CustomViewCell
-        if let item = insentives?[indexPath.row] {
-            
-            cell.label.text = item.title
-            cell.pointLabel.text = String(item.point)
-        }
-        
-        return cell
-        
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
-        showDeleteWarning(for: indexPath)
-        
-        tableView.reloadData()
-        tableView.deselectRow(at: indexPath, animated: true)
-    }
-    
-    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == UITableViewCell.EditingStyle.delete {
-            updateModel(at: indexPath)
-            tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.automatic)
-        }
-    }
+   
     
     // MARK: - data
     func Calculation(for indexPath: IndexPath) {
@@ -173,6 +144,42 @@ class InsentiveViewController: UIViewController,UITableViewDelegate,UITableViewD
         performSegue(withIdentifier: "goToEditPoint", sender: nil)
     }
     
+}
+
+// MARK: - tableView delegate
+extension InsentiveViewController: UITableViewDelegate,UITableViewDataSource {
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return insentives?.count ?? 1
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        let cell = tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! CustomViewCell
+        if let item = insentives?[indexPath.row] {
+            
+            cell.label.text = item.title
+            cell.pointLabel.text = String(item.point)
+        }
+        
+        return cell
+        
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        showDeleteWarning(for: indexPath)
+        
+        tableView.reloadData()
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == UITableViewCell.EditingStyle.delete {
+            updateModel(at: indexPath)
+            tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.automatic)
+        }
+    }
 }
 
 // MARK: - instructions

@@ -37,6 +37,7 @@ class EditPointViewController: UIViewController {
         textField.text = String(savedNumber)
     }
     
+    
     func firstLaunch() {
         let launchPoint = UserDefaults.standard.bool(forKey: "launchPoint")
         if launchPoint == true {

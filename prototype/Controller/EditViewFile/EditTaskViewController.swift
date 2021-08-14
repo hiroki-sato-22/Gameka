@@ -8,7 +8,7 @@
 import UIKit
 import RealmSwift
 
-class EditTaskViewController: UIViewController,UIPickerViewDelegate,UIPickerViewDataSource {
+class EditTaskViewController: UIViewController {
     
     @IBOutlet weak var backView: UIView!
     @IBOutlet weak var goalTextField: UITextField!
@@ -30,24 +30,6 @@ class EditTaskViewController: UIViewController,UIPickerViewDelegate,UIPickerView
         thePicker.delegate = self
         textField.inputView = thePicker
         backView.layer.cornerRadius = 10
-    }
-    
-    
-    // MARK: - pickerView
-    func numberOfComponents(in pickerView: UIPickerView) -> Int {
-        return 1
-    }
-    
-    func pickerView( _ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return dataList.count
-    }
-    
-    func pickerView( _ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        return String(dataList[row])
-    }
-    
-    func pickerView( _ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        textField.text = String(dataList[row])
     }
     
     // MARK: - data
@@ -101,4 +83,24 @@ class EditTaskViewController: UIViewController,UIPickerViewDelegate,UIPickerView
     }
         
     
+}
+
+// MARK: - pickerView
+extension EditTaskViewController: UIPickerViewDelegate,UIPickerViewDataSource {
+
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    
+    func pickerView( _ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return dataList.count
+    }
+    
+    func pickerView( _ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return String(dataList[row])
+    }
+    
+    func pickerView( _ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        textField.text = String(dataList[row])
+    }
 }
