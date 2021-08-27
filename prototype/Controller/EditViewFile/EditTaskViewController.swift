@@ -10,9 +10,7 @@ import RealmSwift
 
 class EditTaskViewController: UIViewController {
     
-    @IBOutlet weak var backView: UIView!
-    @IBOutlet weak var goalTextField: UITextField!
-    @IBOutlet weak var textField: UITextField!
+    @IBOutlet weak var tableView: UITableView!
     
     let thePicker = UIPickerView()
     let dataList = [Int](arrayLiteral: 1,2,3,4,5)
@@ -26,10 +24,16 @@ class EditTaskViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        tableView.delegate = self
+        tableView.dataSource = self
         thePicker.delegate = self
-        textField.inputView = thePicker
-        backView.layer.cornerRadius = 10
+        isModalInPresentation = true
+        self.tableView.tableFooterView = UIView()
+        tableView.register(UINib(nibName: "FirstCustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
+        tableView.register(UINib(nibName: "SecondCustomCell", bundle: nil), forCellReuseIdentifier: "customCell2")
+        
+        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
+                self.navigationController?.navigationBar.shadowImage = UIImage()
     }
     
     // MARK: - data
@@ -41,7 +45,7 @@ class EditTaskViewController: UIViewController {
     func displayMyAlertMessage(userMessage:String){
         
         let myAlert = UIAlertController(title: "入力内容を確認してください", message: userMessage, preferredStyle: UIAlertController.Style.alert)
-        let okAction = UIAlertAction(title: "Ok", style: UIAlertAction.Style.default, handler: nil)
+        let okAction = UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: nil)
         myAlert.addAction(okAction)
         self.present(myAlert, animated: true, completion: nil)
     }
@@ -52,23 +56,29 @@ class EditTaskViewController: UIViewController {
         self.dismiss(animated: true, completion: nil)
     }
     
-    @IBAction func add(_ sender: Any) {
+    @IBAction func addButtonPressed(_ sender: Any) {
+        let index = IndexPath(row: 0, section: 0)
+        let cell = self.tableView.cellForRow(at: index) as! FirstCustomCell
+        
+        let index2 = IndexPath(row: 1, section: 0)
+        let cell2 = self.tableView.cellForRow(at: index2) as! SecondCustomCell
+        
         if let currentCategory = selectedCategory {
             do {
                 try realm.write {
                     let newItem = Item()
                     //空判定
-                    guard let text = goalTextField.text, !text.isEmpty else {
-                        displayMyAlertMessage(userMessage: "Small Goalを入力してください")
+                    guard let text = cell.textField.text, !text.isEmpty else {
+                        displayMyAlertMessage(userMessage: "タスクを入力してください")
                         return
                     }
-                    guard let text = textField.text, !text.isEmpty else {
-                        displayMyAlertMessage(userMessage: "Pointを選択してください")
+                    guard let text = cell2.textField.text, !text.isEmpty else {
+                        displayMyAlertMessage(userMessage: "獲得ポイントを選択してください")
                         return
                     }
                     
-                    newItem.title = goalTextField.text!
-                    newItem.getPoint = Int(textField.text!)!
+                    newItem.title = cell.textField.text!
+                    newItem.getPoint = Int(cell2.textField.text!)!
                     
                     newItem.dateCreated = Date()
                     currentCategory.items.append(newItem)
@@ -81,13 +91,13 @@ class EditTaskViewController: UIViewController {
             }
         }
     }
-        
+    
     
 }
 
 // MARK: - pickerView
 extension EditTaskViewController: UIPickerViewDelegate,UIPickerViewDataSource {
-
+    
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
     }
@@ -101,6 +111,35 @@ extension EditTaskViewController: UIPickerViewDelegate,UIPickerViewDataSource {
     }
     
     func pickerView( _ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        textField.text = String(dataList[row])
+        
+        let index2 = IndexPath(row: 1, section: 0)
+        let cell2 = self.tableView.cellForRow(at: index2) as! SecondCustomCell
+        
+        cell2.textField.text = String(dataList[row])
+    }
+}
+
+extension EditTaskViewController: UITableViewDelegate,UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 2
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        if indexPath.row == 0 {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! FirstCustomCell
+            cell.selectionStyle = UITableViewCell.SelectionStyle.none
+            cell.label.text = "タスク"
+
+            return cell
+        }
+        else {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "customCell2", for: indexPath) as! SecondCustomCell
+            cell.textField.inputView = thePicker
+            cell.selectionStyle = UITableViewCell.SelectionStyle.none
+
+            return cell
+        }
+        
     }
 }

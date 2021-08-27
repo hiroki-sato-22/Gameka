@@ -26,15 +26,16 @@ class InsentiveViewController: UIViewController {
         setTableView()
         NotificationCenter.default.addObserver(self, selector: #selector(loadList), name: NSNotification.Name(rawValue: "load"), object: nil)
         self.coachMarksController.dataSource = self
-        
-        firstLaunch()
+//        firstLaunch()
+        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
+                self.navigationController?.navigationBar.shadowImage = UIImage()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
         let savedNumber = UserDefaults.standard.integer(forKey: "currentValue")
         pointLabel.title = String(savedNumber)
+//        self.coachMarksController.start(in: .window(over: self))
     }
     
     func setTableView() {
@@ -42,12 +43,17 @@ class InsentiveViewController: UIViewController {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(UINib(nibName: "CustomViewCell", bundle: nil), forCellReuseIdentifier: "customCell")
-        tableView.separatorStyle = .none
+//        tableView.separatorStyle = .none
+       
+        self.tableView.tableFooterView = UIView()
+
     }
     
     @objc func loadList(notification: NSNotification){
         //load data here
         self.tableView.reloadData()
+        let savedNumber = UserDefaults.standard.integer(forKey: "currentValue")
+        pointLabel.title = String(savedNumber)
     }
     
     
@@ -113,7 +119,7 @@ class InsentiveViewController: UIViewController {
     // MARK: - alert
     func showDeleteWarning(for indexPath: IndexPath) {
         //Create the alert controller and actions
-        let alert = UIAlertController(title: "インセンティブを実行しますか？", message: "OKを選択すると所持ポイントから減算されます", preferredStyle: .alert)
+        let alert = UIAlertController(title: "ご褒美を実行しますか？", message: "OKを選択すると所持ポイントから減算されます", preferredStyle: .alert)
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
         let deleteAction = UIAlertAction(title: "OK", style: .destructive) { _ in
             DispatchQueue.main.async {
@@ -156,6 +162,7 @@ extension InsentiveViewController: UITableViewDelegate,UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! CustomViewCell
+        cell.nextLabel.isHidden = true
         if let item = insentives?[indexPath.row] {
             
             cell.label.text = item.title
@@ -187,7 +194,7 @@ extension InsentiveViewController: CoachMarksControllerDataSource, CoachMarksCon
     func coachMarksController(_ coachMarksController: CoachMarksController, coachMarkViewsAt index: Int, madeFrom coachMark: CoachMark) -> (bodyView: (UIView & CoachMarkBodyView), arrowView: (UIView & CoachMarkArrowView)?) {
         
         let coachViews = coachMarksController.helper.makeDefaultCoachViews(
-            withArrow: true,
+            withArrow: false,
             arrowOrientation: coachMark.arrowOrientation
         )
         
@@ -195,7 +202,8 @@ extension InsentiveViewController: CoachMarksControllerDataSource, CoachMarksCon
         switch index {
         case 0:
             coachViews.bodyView.hintLabel.text = "このボタンでタスクを完了した時の自分へのご褒美を設定できます"
-            coachViews.bodyView.nextLabel.text = "OK"
+            coachViews.bodyView.separator.isHidden = true
+            coachViews.bodyView.background.borderColor = .clear
             
         default:
             break
@@ -219,6 +227,5 @@ extension InsentiveViewController: CoachMarksControllerDataSource, CoachMarksCon
     func numberOfCoachMarks(for coachMarksController: CoachMarksController) -> Int {
         return 1
     }
-    
-    
 }
+

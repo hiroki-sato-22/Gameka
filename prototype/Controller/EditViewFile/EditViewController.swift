@@ -10,18 +10,24 @@ import RealmSwift
 
 class EditViewController: UIViewController {
     
-    @IBOutlet weak var textField: UITextField!
-    @IBOutlet weak var backView: UIView!
+    @IBOutlet weak var tableView: UITableView!
+    
     
     let realm = try! Realm()
     var categories: Results<Category>?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        backView.layer.cornerRadius = 10
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.register(UINib(nibName: "FirstCustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
+        isModalInPresentation = true
+        self.tableView.tableFooterView = UIView()
+        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
+                self.navigationController?.navigationBar.shadowImage = UIImage()
     }
     
-    // MARK: - data
+    
     func save(category: Category) {
         do {
             try realm.write {
@@ -32,8 +38,6 @@ class EditViewController: UIViewController {
         }
     }
     
-    
-    // MARK: - alert
     func displayMyAlertMessage(userMessage:String){
         
         let myAlert = UIAlertController(title: "入力内容を確認してください", message: userMessage, preferredStyle: UIAlertController.Style.alert)
@@ -42,27 +46,43 @@ class EditViewController: UIViewController {
         self.present(myAlert, animated: true, completion: nil)
     }
     
-    // MARK: - action
-    @IBAction func add(_ sender: Any) {
+    @IBAction func back(_ sender: Any) {
+        dismiss(animated: true, completion: nil)
+    }
+    
+    @IBAction func addButtonPressed(_ sender: Any) {
         
         let newCategory = Category()
         
-        guard let text = textField.text, !text.isEmpty else {
-            self.displayMyAlertMessage(userMessage: "Goalを入力してください")
+        let index = IndexPath(row: 0, section: 0)
+        let cell = self.tableView.cellForRow(at: index) as! FirstCustomCell
+        
+        guard let text = cell.textField.text, !text.isEmpty else {
+            self.displayMyAlertMessage(userMessage: "カテゴリーを入力してください")
             return
         }
         
-        newCategory.name = textField.text!
+        newCategory.name = cell.textField.text!
         self.save(category: newCategory)
         
         NotificationCenter.default.post(name: NSNotification.Name(rawValue: "load"), object: nil)
         
         self.dismiss(animated: true, completion: nil)
     }
-    @IBAction func back(_ sender: Any) {
-        
-        dismiss(animated: true, completion: nil)
-    }
+    
 }
 
-
+extension EditViewController: UITableViewDelegate,UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 1
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = self.tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! FirstCustomCell
+        cell.selectionStyle = UITableViewCell.SelectionStyle.none
+        cell.label.text = "カテゴリー"
+        
+        return cell
+    }
+    
+}

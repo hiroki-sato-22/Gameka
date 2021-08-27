@@ -8,6 +8,7 @@
 import UIKit
 import RealmSwift
 import Instructions
+import ChameleonFramework
 
 class CategoryViewController: UIViewController{
     
@@ -27,6 +28,8 @@ class CategoryViewController: UIViewController{
         firstLaunch()
         setTableView()
         NotificationCenter.default.addObserver(self, selector: #selector(loadList), name: NSNotification.Name(rawValue: "load"), object: nil)
+//        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
+//                self.navigationController?.navigationBar.shadowImage = UIImage()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -39,8 +42,9 @@ class CategoryViewController: UIViewController{
     func setTableView() {
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.separatorStyle = .none
+        tableView.tableFooterView = UIView()
         tableView.rowHeight = 80
+        tableView.backgroundColor = .clear
         tableView.register(UINib(nibName: "CustomViewCell", bundle: nil), forCellReuseIdentifier: "customCell")
     }
     
@@ -58,6 +62,8 @@ class CategoryViewController: UIViewController{
     @objc func loadList(notification: NSNotification){
         //load data here
         self.tableView.reloadData()
+        let savedNumber = UserDefaults.standard.integer(forKey: "currentValue")
+        pointLabel.title = String(savedNumber)
     }
   
     
@@ -97,10 +103,10 @@ class CategoryViewController: UIViewController{
     }
     
     @IBAction func pointPressed(_ sender: Any) {
+
         performSegue(withIdentifier: "goToEditPoint", sender: nil)
     }
     
-    // MARK: - segue
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         
         if segue.identifier == "goToItems" {
@@ -111,8 +117,6 @@ class CategoryViewController: UIViewController{
             destinationVC.title = titleString
         }
     }
-    
-    
 }
 
 // MARK: - tableView delegate
@@ -127,7 +131,7 @@ extension CategoryViewController: UITableViewDelegate,UITableViewDataSource {
         let cell = self.tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! CustomViewCell
         cell.label.text = categories?[indexPath.row].name ?? "No Categories added yet"
         cell.pointLabel.isHidden = true
-        
+        cell.selectionStyle = UITableViewCell.SelectionStyle.none
         return cell
     }
     
@@ -145,25 +149,29 @@ extension CategoryViewController: UITableViewDelegate,UITableViewDataSource {
             tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.automatic)
         }
     }
+    
 }
 
 // MARK: - instructions
 extension CategoryViewController: CoachMarksControllerDataSource, CoachMarksControllerDelegate {
+    
     func coachMarksController(_ coachMarksController: CoachMarksController, coachMarkViewsAt index: Int, madeFrom coachMark: CoachMark) -> (bodyView: (UIView & CoachMarkBodyView), arrowView: (UIView & CoachMarkArrowView)?) {
         
         let coachViews = coachMarksController.helper.makeDefaultCoachViews(
-            withArrow: true,
+            withArrow: false,
             arrowOrientation: coachMark.arrowOrientation
         )
         
         switch index {
         case 0:
-            coachViews.bodyView.hintLabel.text = "このボタンで目標を追加できます"
-            coachViews.bodyView.nextLabel.text = "OK"
+            coachViews.bodyView.hintLabel.text = "このボタンでカテゴリーを追加できます"
+            coachViews.bodyView.separator.isHidden = true
+            coachViews.bodyView.background.borderColor = .clear
             
         case 1:
             coachViews.bodyView.hintLabel.text = "数字をタップすると所持ポイントを編集できます"
-            coachViews.bodyView.nextLabel.text = "OK"
+            coachViews.bodyView.separator.isHidden = true
+            coachViews.bodyView.background.borderColor = .clear
             
         default:
             break
@@ -176,6 +184,8 @@ extension CategoryViewController: CoachMarksControllerDataSource, CoachMarksCont
     
     func coachMarksController(_ coachMarksController: CoachMarksController, coachMarkAt index: Int) -> CoachMark {
         
+        
+        
         let highlightViews: Array<UIView> = [
             addGoal.value(forKey: "view") as! UIView,
             pointLabel.value(forKey: "view") as! UIView,
@@ -187,7 +197,5 @@ extension CategoryViewController: CoachMarksControllerDataSource, CoachMarksCont
     func numberOfCoachMarks(for coachMarksController: CoachMarksController) -> Int {
         return 2
     }
-    
-    
 }
 

@@ -12,7 +12,7 @@ import Instructions
 class ListViewController: UIViewController,UITextFieldDelegate {
     
     @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var totalPointDisplay: UIBarButtonItem!
+    @IBOutlet weak var pointLabel: UIBarButtonItem!
     @IBOutlet weak var addButton: UIBarButtonItem!
     
     let coachMarksController = CoachMarksController()
@@ -31,13 +31,16 @@ class ListViewController: UIViewController,UITextFieldDelegate {
         NotificationCenter.default.addObserver(self, selector: #selector(loadList), name: NSNotification.Name(rawValue: "load"), object: nil)
         self.coachMarksController.dataSource = self
         firstLaunch()
+//        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
+//                self.navigationController?.navigationBar.shadowImage = UIImage()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         //pointLabelに表示
         let savedNumber = UserDefaults.standard.integer(forKey: "currentValue")
-        totalPointDisplay.title = String(savedNumber)
+        pointLabel.title = String(savedNumber)
+//        self.coachMarksController.start(in: .window(over: self))
     }
     
     func setTableView() {
@@ -45,7 +48,9 @@ class ListViewController: UIViewController,UITextFieldDelegate {
         tableView.dataSource = self
         tableView.rowHeight = 80.0
         tableView.register(UINib(nibName: "CustomViewCell", bundle: nil), forCellReuseIdentifier: "customCell")
-        tableView.separatorStyle = .none
+//        tableView.separatorStyle = .none
+//        tableView.layer.cornerRadius = 20
+        self.tableView.tableFooterView = UIView()
     }
     
     func firstLaunch() {
@@ -61,6 +66,8 @@ class ListViewController: UIViewController,UITextFieldDelegate {
     @objc func loadList(notification: NSNotification){
         //load data here
         self.tableView.reloadData()
+        let savedNumber = UserDefaults.standard.integer(forKey: "currentValue")
+        pointLabel.title = String(savedNumber)
     }
     
     
@@ -110,7 +117,6 @@ class ListViewController: UIViewController,UITextFieldDelegate {
         performSegue(withIdentifier: "goToEditPoint", sender: nil)
     }
     
-    // MARK: - segue
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "goToEditSmallTasks" {
             
@@ -120,8 +126,6 @@ class ListViewController: UIViewController,UITextFieldDelegate {
             destinationVC.selectedCategory = self.selectedCategory
         }
     }
-    
-    
 }
 
 
@@ -135,6 +139,8 @@ extension ListViewController: UITableViewDelegate,UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = self.tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! CustomViewCell
+        cell.selectionStyle = UITableViewCell.SelectionStyle.none
+        cell.nextLabel.isHidden = true
         
         if let item = toDoItems?[indexPath.row] {
             cell.label.text = item.title
@@ -178,7 +184,7 @@ extension ListViewController: UITableViewDelegate,UITableViewDataSource {
         UserDefaults.standard.set(currentPoint, forKey: "currentValue")
         //currentPointをnavBarに表示
         let savedNumber = UserDefaults.standard.integer(forKey: "currentValue")
-        totalPointDisplay.title = String(savedNumber)
+        pointLabel.title = String(savedNumber)
     }
 }
 
@@ -187,14 +193,15 @@ extension ListViewController: CoachMarksControllerDataSource, CoachMarksControll
     func coachMarksController(_ coachMarksController: CoachMarksController, coachMarkViewsAt index: Int, madeFrom coachMark: CoachMark) -> (bodyView: (UIView & CoachMarkBodyView), arrowView: (UIView & CoachMarkArrowView)?) {
         
         let coachViews = coachMarksController.helper.makeDefaultCoachViews(
-            withArrow: true,
+            withArrow: false,
             arrowOrientation: coachMark.arrowOrientation
         )
         
         switch index {
         case 0:
-            coachViews.bodyView.hintLabel.text = "このボタンで目標達成までに行なうスモールタスクを設定できます"
-            coachViews.bodyView.nextLabel.text = "OK"
+            coachViews.bodyView.hintLabel.text = "このボタンでタスクを追加できます"
+            coachViews.bodyView.separator.isHidden = true
+            coachViews.bodyView.background.borderColor = .clear
             
         default:
             break
@@ -217,7 +224,6 @@ extension ListViewController: CoachMarksControllerDataSource, CoachMarksControll
     func numberOfCoachMarks(for coachMarksController: CoachMarksController) -> Int {
         return 1
     }
-    
-    
 }
+
 

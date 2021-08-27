@@ -9,10 +9,8 @@ import UIKit
 import RealmSwift
 
 class EditInsentiveViewController: UIViewController {
-
-    @IBOutlet weak var backView: UIView!
-    @IBOutlet weak var goalTextField: UITextField!
-    @IBOutlet weak var textField: UITextField!
+    
+    @IBOutlet weak var tableView: UITableView!
     
     let thePicker = UIPickerView()
     
@@ -25,8 +23,15 @@ class EditInsentiveViewController: UIViewController {
         super.viewDidLoad()
 
         thePicker.delegate = self
-        textField.inputView = thePicker
-        backView.layer.cornerRadius = 10
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.register(UINib(nibName: "FirstCustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
+        tableView.register(UINib(nibName: "SecondCustomCell", bundle: nil), forCellReuseIdentifier: "customCell2")
+        self.tableView.tableFooterView = UIView()
+       
+        isModalInPresentation = true
+        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
+                self.navigationController?.navigationBar.shadowImage = UIImage()
     }
     
     
@@ -46,28 +51,33 @@ class EditInsentiveViewController: UIViewController {
     func displayMyAlertMessage(userMessage:String){
         
         let myAlert = UIAlertController(title: "入力内容を確認してください", message: userMessage, preferredStyle: UIAlertController.Style.alert)
-        let okAction = UIAlertAction(title: "Ok", style: UIAlertAction.Style.default, handler: nil)
+        let okAction = UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: nil)
         myAlert.addAction(okAction)
         self.present(myAlert, animated: true, completion: nil)
     }
 
     // MARK: - action
     @IBAction func add(_ sender: Any) {
+        let index = IndexPath(row: 0, section: 0)
+        let cell = self.tableView.cellForRow(at: index) as! FirstCustomCell
+        
+        let index2 = IndexPath(row: 1, section: 0)
+        let cell2 = self.tableView.cellForRow(at: index2) as! SecondCustomCell
         
         let newCategory = Insentive()
         
         //空判定
-        guard let text = goalTextField.text, !text.isEmpty else {
-            displayMyAlertMessage(userMessage: "Insentiveを入力してください")
+        guard let text = cell.textField.text, !text.isEmpty else {
+            displayMyAlertMessage(userMessage: "ご褒美を入力してください")
             return
         }
-        guard let text = textField.text, !text.isEmpty else {
-            displayMyAlertMessage(userMessage: "Pointを選択してください")
+        guard let text = cell2.textField.text, !text.isEmpty else {
+            displayMyAlertMessage(userMessage: "消費ポイントを選択してください")
             return
         }
         
-        newCategory.title = goalTextField.text!
-        newCategory.point = Int(textField.text!)!
+        newCategory.title = cell.textField.text!
+        newCategory.point = Int(cell2.textField.text!)!
         
         self.save(insentive: newCategory)
 
@@ -100,7 +110,35 @@ extension EditInsentiveViewController: UIPickerViewDelegate,UIPickerViewDataSour
     }
     
     func pickerView( _ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        textField.text = String(dataList[row])
+        let index2 = IndexPath(row: 1, section: 0)
+        let cell2 = self.tableView.cellForRow(at: index2) as! SecondCustomCell
+        
+        cell2.textField.text = String(dataList[row])
     }
 }
+
+extension EditInsentiveViewController: UITableViewDelegate,UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 2
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        if indexPath.row == 0 {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! FirstCustomCell
+            cell.selectionStyle = UITableViewCell.SelectionStyle.none
+            cell.label.text = "ご褒美"
+            return cell
+        }
+        else {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "customCell2", for: indexPath) as! SecondCustomCell
+            cell.selectionStyle = UITableViewCell.SelectionStyle.none
+            cell.textField.inputView = thePicker
+            cell.label.text = "消費ポイント"
+            return cell
+        }
+        
+    }
+}
+
 
