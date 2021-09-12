@@ -11,6 +11,7 @@ import RealmSwift
 class EditTaskViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
     
     let thePicker = UIPickerView()
     let dataList = [Int](arrayLiteral: 1,2,3,4,5)
@@ -27,6 +28,10 @@ class EditTaskViewController: UIViewController {
         tableView.delegate = self
         tableView.dataSource = self
         thePicker.delegate = self
+        tableView.layer.cornerRadius = 10
+        tableView.separatorStyle = .none
+        tableView.isScrollEnabled = false
+        tableView.rowHeight = view.frame.height / 9
         isModalInPresentation = true
         self.tableView.tableFooterView = UIView()
         tableView.register(UINib(nibName: "FirstCustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
@@ -34,6 +39,11 @@ class EditTaskViewController: UIViewController {
         
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
                 self.navigationController?.navigationBar.shadowImage = UIImage()
+    }
+    
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        tableViewHeight.constant = view.frame.height / 3
     }
     
     // MARK: - data

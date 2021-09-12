@@ -11,6 +11,7 @@ import RealmSwift
 class EditInsentiveViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
     
     let thePicker = UIPickerView()
     
@@ -25,6 +26,11 @@ class EditInsentiveViewController: UIViewController {
         thePicker.delegate = self
         tableView.delegate = self
         tableView.dataSource = self
+        tableView.rowHeight = view.frame.height / 9
+        tableView.layer.cornerRadius = 10
+        tableView.separatorStyle = .none
+        tableView.isScrollEnabled = false
+
         tableView.register(UINib(nibName: "FirstCustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
         tableView.register(UINib(nibName: "SecondCustomCell", bundle: nil), forCellReuseIdentifier: "customCell2")
         self.tableView.tableFooterView = UIView()
@@ -34,6 +40,10 @@ class EditInsentiveViewController: UIViewController {
                 self.navigationController?.navigationBar.shadowImage = UIImage()
     }
     
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        tableViewHeight.constant = view.frame.height / 3
+    }
     
     
     // MARK: - data

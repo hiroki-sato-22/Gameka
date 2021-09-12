@@ -26,7 +26,7 @@ class InsentiveViewController: UIViewController {
         setTableView()
         NotificationCenter.default.addObserver(self, selector: #selector(loadList), name: NSNotification.Name(rawValue: "load"), object: nil)
         self.coachMarksController.dataSource = self
-//        firstLaunch()
+        firstLaunch()
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
                 self.navigationController?.navigationBar.shadowImage = UIImage()
     }
@@ -39,11 +39,12 @@ class InsentiveViewController: UIViewController {
     }
     
     func setTableView() {
-        tableView.rowHeight = 80.0
+        tableView.rowHeight = view.frame.height / 9
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.register(UINib(nibName: "CustomViewCell", bundle: nil), forCellReuseIdentifier: "customCell")
-//        tableView.separatorStyle = .none
+        tableView.register(UINib(nibName: "CustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
+        tableView.register(UINib(nibName: "InfoCell", bundle: nil), forCellReuseIdentifier: "infoCell")
+        tableView.separatorStyle = .none
        
         self.tableView.tableFooterView = UIView()
 
@@ -155,37 +156,69 @@ class InsentiveViewController: UIViewController {
 // MARK: - tableView delegate
 extension InsentiveViewController: UITableViewDelegate,UITableViewDataSource {
     
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 2
+    }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return insentives?.count ?? 1
+        
+        
+        if section == 0 {
+            return 1
+        }else {
+            return insentives?.count ?? 1
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! CustomViewCell
-        cell.nextLabel.isHidden = true
-        if let item = insentives?[indexPath.row] {
+        if indexPath.section == 0 {
             
-            cell.label.text = item.title
-            cell.pointLabel.text = String(item.point)
+            let cell = self.tableView.dequeueReusableCell(withIdentifier: "infoCell", for: indexPath) as! InfoCell
+            cell.label.text = "追加したご褒美をタップで、実行してポイントを減算。または、左ワイプで削除。"
+            cell.selectionStyle = UITableViewCell.SelectionStyle.none
+            
+            return cell
+            
+        }else {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! CustomCell
+            cell.nextLabel.isHidden = true
+            cell.selectionStyle = UITableViewCell.SelectionStyle.none
+            if let item = insentives?[indexPath.row] {
+                
+                cell.label.text = item.title
+                cell.pointLabel.text = String(item.point)
+            }
+            
+            return cell
         }
         
-        return cell
         
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        showDeleteWarning(for: indexPath)
+        if indexPath.section == 0 {
+            return
+        }else {
+            showDeleteWarning(for: indexPath)
+            tableView.reloadData()
+            tableView.deselectRow(at: indexPath, animated: true)
+        }
         
-        tableView.reloadData()
-        tableView.deselectRow(at: indexPath, animated: true)
     }
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == UITableViewCell.EditingStyle.delete {
-            updateModel(at: indexPath)
-            tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.automatic)
-        }
+        
+            if editingStyle == UITableViewCell.EditingStyle.delete {
+                updateModel(at: indexPath)
+                tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.automatic)
+            }
+    }
+    
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        if indexPath.section == 0 { return false }
+        return true
     }
 }
 

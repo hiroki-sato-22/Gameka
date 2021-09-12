@@ -31,8 +31,6 @@ class ListViewController: UIViewController,UITextFieldDelegate {
         NotificationCenter.default.addObserver(self, selector: #selector(loadList), name: NSNotification.Name(rawValue: "load"), object: nil)
         self.coachMarksController.dataSource = self
         firstLaunch()
-//        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
-//                self.navigationController?.navigationBar.shadowImage = UIImage()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -40,16 +38,17 @@ class ListViewController: UIViewController,UITextFieldDelegate {
         //pointLabelに表示
         let savedNumber = UserDefaults.standard.integer(forKey: "currentValue")
         pointLabel.title = String(savedNumber)
+        tableView.reloadData()
 //        self.coachMarksController.start(in: .window(over: self))
     }
     
     func setTableView() {
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.rowHeight = 80.0
-        tableView.register(UINib(nibName: "CustomViewCell", bundle: nil), forCellReuseIdentifier: "customCell")
-//        tableView.separatorStyle = .none
-//        tableView.layer.cornerRadius = 20
+        tableView.rowHeight = view.frame.height / 9
+        tableView.register(UINib(nibName: "CustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
+        tableView.register(UINib(nibName: "InfoCell", bundle: nil), forCellReuseIdentifier: "infoCell")
+        tableView.separatorStyle = .none
         self.tableView.tableFooterView = UIView()
     }
     
@@ -132,43 +131,73 @@ class ListViewController: UIViewController,UITextFieldDelegate {
 // MARK: - tableView delegate
 extension ListViewController: UITableViewDelegate,UITableViewDataSource {
     
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 2
+    }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return toDoItems?.count ?? 1
+        
+        if section == 0 {
+            return 1
+        }else {
+            return toDoItems?.count ?? 1
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = self.tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! CustomViewCell
-        cell.selectionStyle = UITableViewCell.SelectionStyle.none
-        cell.nextLabel.isHidden = true
-        
-        if let item = toDoItems?[indexPath.row] {
-            cell.label.text = item.title
-            cell.pointLabel.text = String(item.getPoint)
+        if indexPath.section == 0 {
             
-        } else {
-            cell.textLabel?.text = "No Items Added"
+            let cell = self.tableView.dequeueReusableCell(withIdentifier: "infoCell", for: indexPath) as! InfoCell
+            cell.label.text = "追加したタスクをタップで、完了してポイントを加算。または、左ワイプで削除。"
+            cell.selectionStyle = UITableViewCell.SelectionStyle.none
+            
+            return cell
+        }else {
+            let cell = self.tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! CustomCell
+            cell.selectionStyle = UITableViewCell.SelectionStyle.none
+            cell.nextLabel.isHidden = true
+            
+            if let item = toDoItems?[indexPath.row] {
+                cell.label.text = item.title
+                cell.pointLabel.text = String(item.getPoint)
+                
+            } else {
+                cell.textLabel?.text = "No Items Added"
+            }
+            
+            return cell
         }
         
-        return cell
     }
     
     
     //Mark - TableView Delegate Methods
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        showDeleteWarning(for: indexPath)
+        if indexPath.section == 0 {
+            return
+        }else {
+            showDeleteWarning(for: indexPath)
+            tableView.reloadData()
+            tableView.deselectRow(at: indexPath, animated: true)
+        }
         
-        tableView.reloadData()
-        tableView.deselectRow(at: indexPath, animated: true)
     }
     
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == UITableViewCell.EditingStyle.delete {
-            updateModel(at: indexPath)
-            tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.automatic)
-        }
+
+            if editingStyle == UITableViewCell.EditingStyle.delete {
+                updateModel(at: indexPath)
+                tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.automatic)
+            }
+    }
+    
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        if indexPath.section == 0 { return false }
+        return true
     }
     
     func Calculation(for indexPath: IndexPath) {

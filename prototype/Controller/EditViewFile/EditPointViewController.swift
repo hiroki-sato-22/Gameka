@@ -12,6 +12,7 @@ import Instructions
 class EditPointViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
     
     let coachMarksController = CoachMarksController()
     
@@ -19,6 +20,11 @@ class EditPointViewController: UIViewController {
         super.viewDidLoad()
         tableView.delegate = self
         tableView.dataSource = self
+        tableView.rowHeight = view.frame.height / 9
+        tableView.separatorStyle = .none
+        tableView.layer.cornerRadius = 10
+        tableView.isScrollEnabled = false
+
         tableView.register(UINib(nibName: "FirstCustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
         self.tableView.tableFooterView = UIView()
        
@@ -39,16 +45,10 @@ class EditPointViewController: UIViewController {
         cell.textField.text = String(savedNumber)
     }
     
-    
-//    func firstLaunch() {
-//        let launchPoint = UserDefaults.standard.bool(forKey: "launchPoint")
-//        if launchPoint == true {
-//            return
-//        } else {
-//            UserDefaults.standard.set(true, forKey: "launchPoint")
-//            self.coachMarksController.start(in: .window(over: self))
-//        }
-//    }
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        tableViewHeight.constant = view.frame.height / 4
+    }
     
     
     

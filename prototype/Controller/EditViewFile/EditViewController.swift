@@ -11,20 +11,30 @@ import RealmSwift
 class EditViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
     
     
     let realm = try! Realm()
     var categories: Results<Category>?
     
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.delegate = self
         tableView.dataSource = self
+        tableView.separatorStyle = .none
+        tableView.layer.cornerRadius = 10
+        tableView.rowHeight = view.frame.height / 9
+        tableView.isScrollEnabled = false
         tableView.register(UINib(nibName: "FirstCustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
         isModalInPresentation = true
-        self.tableView.tableFooterView = UIView()
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
                 self.navigationController?.navigationBar.shadowImage = UIImage()
+    }
+    
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        tableViewHeight.constant = view.frame.height / 4
     }
     
     
@@ -63,6 +73,7 @@ class EditViewController: UIViewController {
         }
         
         newCategory.name = cell.textField.text!
+
         self.save(category: newCategory)
         
         NotificationCenter.default.post(name: NSNotification.Name(rawValue: "load"), object: nil)

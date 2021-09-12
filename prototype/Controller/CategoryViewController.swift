@@ -8,7 +8,6 @@
 import UIKit
 import RealmSwift
 import Instructions
-import ChameleonFramework
 
 class CategoryViewController: UIViewController{
     
@@ -28,8 +27,6 @@ class CategoryViewController: UIViewController{
         firstLaunch()
         setTableView()
         NotificationCenter.default.addObserver(self, selector: #selector(loadList), name: NSNotification.Name(rawValue: "load"), object: nil)
-//        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
-//                self.navigationController?.navigationBar.shadowImage = UIImage()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -39,15 +36,16 @@ class CategoryViewController: UIViewController{
         pointLabel.title = String(savedNumber)
     }
     
+    
+    
     func setTableView() {
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.tableFooterView = UIView()
-        tableView.rowHeight = 80
-        tableView.backgroundColor = .clear
-        tableView.register(UINib(nibName: "CustomViewCell", bundle: nil), forCellReuseIdentifier: "customCell")
+        tableView.rowHeight = view.frame.height / 9
+        tableView.separatorStyle = .none
+        tableView.register(UINib(nibName: "CustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
+        tableView.register(UINib(nibName: "InfoCell", bundle: nil), forCellReuseIdentifier: "infoCell")
     }
-    
     
     func firstLaunch() {
         let launchCategory = UserDefaults.standard.bool(forKey: "launchCategory")
@@ -65,7 +63,7 @@ class CategoryViewController: UIViewController{
         let savedNumber = UserDefaults.standard.integer(forKey: "currentValue")
         pointLabel.title = String(savedNumber)
     }
-  
+    
     
     // MARK: - data
     func save(category: Category) {
@@ -103,7 +101,7 @@ class CategoryViewController: UIViewController{
     }
     
     @IBAction func pointPressed(_ sender: Any) {
-
+        
         performSegue(withIdentifier: "goToEditPoint", sender: nil)
     }
     
@@ -122,33 +120,68 @@ class CategoryViewController: UIViewController{
 // MARK: - tableView delegate
 extension CategoryViewController: UITableViewDelegate,UITableViewDataSource {
     
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 2
+    }
+    
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categories?.count ?? 1
+       
+        if section == 0 {
+            return 1
+        }else {
+            return categories?.count ?? 1
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = self.tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! CustomViewCell
-        cell.label.text = categories?[indexPath.row].name ?? "No Categories added yet"
-        cell.pointLabel.isHidden = true
-        cell.selectionStyle = UITableViewCell.SelectionStyle.none
-        return cell
+        if indexPath.section == 0 {
+            let cell = self.tableView.dequeueReusableCell(withIdentifier: "infoCell", for: indexPath) as! InfoCell
+            cell.label.text = "追加したカテゴリーをタップで、タスク追加画面へ。または、左ワイプで削除。"
+            cell.selectionStyle = UITableViewCell.SelectionStyle.none
+            
+            return cell
+        }else {
+            let cell = self.tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! CustomCell
+            cell.label.text = categories?[indexPath.row].name ?? "No Categories added yet"
+            cell.pointLabel.isHidden = true
+            cell.layer.cornerRadius = 10
+            cell.selectionStyle = UITableViewCell.SelectionStyle.none
+            
+            return cell
+        }
+        
+        
     }
     
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
+        if indexPath.section == 0 {
+            return
+        }else {
         titleString = categories?[indexPath.row].name
         performSegue(withIdentifier: "goToItems", sender: self)
+        }
+        
     }
     
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        
         if editingStyle == UITableViewCell.EditingStyle.delete {
             updateModel(at: indexPath)
             tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.automatic)
         }
     }
+    
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        if indexPath.section == 0 { return false }
+        return true
+    }
+    
+    
     
 }
 
