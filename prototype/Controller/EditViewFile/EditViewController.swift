@@ -11,30 +11,24 @@ import RealmSwift
 class EditViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
-    
     
     let realm = try! Realm()
     var categories: Results<Category>?
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.separatorStyle = .none
-        tableView.layer.cornerRadius = 10
-        tableView.rowHeight = view.frame.height / 9
-        tableView.isScrollEnabled = false
-        tableView.register(UINib(nibName: "FirstCustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
+        view.backgroundColor = .systemBackground
+        setTalbeView()
         isModalInPresentation = true
-        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
-                self.navigationController?.navigationBar.shadowImage = UIImage()
     }
     
-    override func viewWillLayoutSubviews() {
-        super.viewWillLayoutSubviews()
-        tableViewHeight.constant = view.frame.height / 4
+    func setTalbeView() {
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.rowHeight = 60
+        tableView.isScrollEnabled = false
+        tableView.backgroundColor = .systemBackground
+        tableView.register(UINib(nibName: "FirstCustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
     }
     
     
@@ -84,14 +78,15 @@ class EditViewController: UIViewController {
 }
 
 extension EditViewController: UITableViewDelegate,UITableViewDataSource {
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 1
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = self.tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! FirstCustomCell
-        cell.selectionStyle = UITableViewCell.SelectionStyle.none
-        cell.label.text = "カテゴリー"
+        cell.textField.backgroundColor = .clear
+        cell.backgroundColor = .secondarySystemBackground
         
         return cell
     }

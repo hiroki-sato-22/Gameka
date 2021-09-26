@@ -8,34 +8,35 @@
 import UIKit
 import RealmSwift
 import Instructions
+import ChameleonFramework
 
 class InsentiveViewController: UIViewController {
     
+    @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
     @IBOutlet weak var addButton: UIBarButtonItem!
     @IBOutlet weak var pointLabel: UIBarButtonItem!
     @IBOutlet weak var tableView: UITableView!
     
     let coachMarksController = CoachMarksController()
     let realm = try! Realm()
+    let userDefaults = UserDefaults.standard
     var insentives: Results<Insentive>?
     var currentPoint = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        loadCategories()
+        view.backgroundColor = .systemBackground
+        loadInsentives()
         setTableView()
         NotificationCenter.default.addObserver(self, selector: #selector(loadList), name: NSNotification.Name(rawValue: "load"), object: nil)
         self.coachMarksController.dataSource = self
         firstLaunch()
-        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
-                self.navigationController?.navigationBar.shadowImage = UIImage()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        let savedNumber = UserDefaults.standard.integer(forKey: "currentValue")
+        let savedNumber = userDefaults.integer(forKey: "currentValue")
         pointLabel.title = String(savedNumber)
-//        self.coachMarksController.start(in: .window(over: self))
     }
     
     func setTableView() {
@@ -45,45 +46,39 @@ class InsentiveViewController: UIViewController {
         tableView.register(UINib(nibName: "CustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
         tableView.register(UINib(nibName: "InfoCell", bundle: nil), forCellReuseIdentifier: "infoCell")
         tableView.separatorStyle = .none
-       
-        self.tableView.tableFooterView = UIView()
-
     }
     
     @objc func loadList(notification: NSNotification){
         //load data here
         self.tableView.reloadData()
-        let savedNumber = UserDefaults.standard.integer(forKey: "currentValue")
+        let savedNumber = userDefaults.integer(forKey: "currentValue")
         pointLabel.title = String(savedNumber)
     }
     
-    
+    func loadInsentives() {
+        
+        insentives = realm.objects(Insentive.self)
+        tableView.reloadData()
+    }
     
     func firstLaunch() {
-        let launchInsentive = UserDefaults.standard.bool(forKey: "launchInsentive")
+        let launchInsentive = userDefaults.bool(forKey: "launchInsentive")
         if launchInsentive == true {
             return
         } else {
-            UserDefaults.standard.set(true, forKey: "launchInsentive")
+            userDefaults.set(true, forKey: "launchInsentive")
             self.coachMarksController.start(in: .window(over: self))
         }
     }
    
-    
-    // MARK: - data
     func Calculation(for indexPath: IndexPath) {
-        //currentPointに値を入れる
+
         if let item = insentives?[indexPath.row] {
-            
-            let savedNumber = UserDefaults.standard.integer(forKey: "currentValue")
-            
+            let savedNumber = userDefaults.integer(forKey: "currentValue")
             currentPoint = savedNumber - item.point
-            
         }
-        //currentPointをuserDefalutsに保存
-        UserDefaults.standard.set(currentPoint, forKey: "currentValue")
-        //currentPointをnavBarに表示
-        let savedNumber = UserDefaults.standard.integer(forKey: "currentValue")
+        userDefaults.set(currentPoint, forKey: "currentValue")
+        let savedNumber = userDefaults.integer(forKey: "currentValue")
         pointLabel.title = String(savedNumber)
     }
     
@@ -111,38 +106,24 @@ class InsentiveViewController: UIViewController {
         tableView.reloadData()
     }
     
-    func loadCategories() {
-        
-        insentives = realm.objects(Insentive.self)
-        tableView.reloadData()
-    }
     
     // MARK: - alert
     func showDeleteWarning(for indexPath: IndexPath) {
-        //Create the alert controller and actions
+
         let alert = UIAlertController(title: "ご褒美を実行しますか？", message: "OKを選択すると所持ポイントから減算されます", preferredStyle: .alert)
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
         let deleteAction = UIAlertAction(title: "OK", style: .destructive) { _ in
             DispatchQueue.main.async {
-                //削除メソッド
                 self.Calculation(for: indexPath)
             }
         }
-        //Add the actions to the alert controller
         alert.addAction(cancelAction)
         alert.addAction(deleteAction)
         
-        //Present the alert controller
         present(alert, animated: true, completion: nil)
         
     }
     
-    
-    
-    
-    
-    
-    // MARK: - action
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         performSegue(withIdentifier: "goToEditInsentives", sender: nil)
     }
@@ -151,60 +132,52 @@ class InsentiveViewController: UIViewController {
         performSegue(withIdentifier: "goToEditPoint", sender: nil)
     }
     
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "goToEditPoint" {
+            
+            let nav = segue.destination as! UINavigationController
+            
+            let destinationVC = nav.topViewController as! EditPointViewController
+            destinationVC.pickerValue = userDefaults.integer(forKey: "currentValue")
+        }
+    }
+    
 }
 
 // MARK: - tableView delegate
 extension InsentiveViewController: UITableViewDelegate,UITableViewDataSource {
     
-    func numberOfSections(in tableView: UITableView) -> Int {
-        return 2
-    }
-    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        
-        
-        if section == 0 {
-            return 1
-        }else {
+
             return insentives?.count ?? 1
-        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
-        if indexPath.section == 0 {
-            
-            let cell = self.tableView.dequeueReusableCell(withIdentifier: "infoCell", for: indexPath) as! InfoCell
-            cell.label.text = "追加したご褒美をタップで、実行してポイントを減算。または、左ワイプで削除。"
-            cell.selectionStyle = UITableViewCell.SelectionStyle.none
-            
-            return cell
-            
-        }else {
             let cell = tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! CustomCell
-            cell.nextLabel.isHidden = true
             cell.selectionStyle = UITableViewCell.SelectionStyle.none
             if let item = insentives?[indexPath.row] {
                 
                 cell.label.text = item.title
                 cell.pointLabel.text = String(item.point)
-            }
-            
-            return cell
         }
         
+        let color = UIColor.systemTeal
         
+        if let colour = color.darken(byPercentage: CGFloat(indexPath.row) / CGFloat(insentives!.count)) {
+            cell.backgroundColor = colour
+            cell.icon.tintColor = ContrastColorOf(colour, returnFlat: true)
+            cell.pointLabel.textColor = ContrastColorOf(colour, returnFlat: true)
+            cell.label.textColor = ContrastColorOf(colour, returnFlat: true)
+        }
+        
+        return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
-        if indexPath.section == 0 {
-            return
-        }else {
+    
             showDeleteWarning(for: indexPath)
             tableView.reloadData()
             tableView.deselectRow(at: indexPath, animated: true)
-        }
         
     }
     
@@ -216,10 +189,6 @@ extension InsentiveViewController: UITableViewDelegate,UITableViewDataSource {
             }
     }
     
-    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        if indexPath.section == 0 { return false }
-        return true
-    }
 }
 
 // MARK: - instructions

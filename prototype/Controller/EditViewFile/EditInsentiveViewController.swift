@@ -11,42 +11,28 @@ import RealmSwift
 class EditInsentiveViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
-    
-    let thePicker = UIPickerView()
     
     let dataList = [Int](arrayLiteral: 1,2,3,4,5)
-    
+    var pickerValue:Int = 1
     let realm = try! Realm()
     var insentives: Results<Insentive>?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        thePicker.delegate = self
+        view.backgroundColor = .systemBackground
+        setTalbeView()
+        isModalInPresentation = true
+    }
+    
+    func setTalbeView() {
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.rowHeight = view.frame.height / 9
-        tableView.layer.cornerRadius = 10
-        tableView.separatorStyle = .none
+        tableView.rowHeight = 60
         tableView.isScrollEnabled = false
-
         tableView.register(UINib(nibName: "FirstCustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
-        tableView.register(UINib(nibName: "SecondCustomCell", bundle: nil), forCellReuseIdentifier: "customCell2")
-        self.tableView.tableFooterView = UIView()
-       
-        isModalInPresentation = true
-        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
-                self.navigationController?.navigationBar.shadowImage = UIImage()
+        tableView.register(UINib(nibName: "PickerViewCell", bundle: nil), forCellReuseIdentifier: "customCell2")
     }
     
-    override func viewWillLayoutSubviews() {
-        super.viewWillLayoutSubviews()
-        tableViewHeight.constant = view.frame.height / 3
-    }
-    
-    
-    // MARK: - data
     func save(insentive: Insentive) {
         do {
             try realm.write {
@@ -57,7 +43,6 @@ class EditInsentiveViewController: UIViewController {
         }
     }
     
-    // MARK: - alert
     func displayMyAlertMessage(userMessage:String){
         
         let myAlert = UIAlertController(title: "入力内容を確認してください", message: userMessage, preferredStyle: UIAlertController.Style.alert)
@@ -65,48 +50,38 @@ class EditInsentiveViewController: UIViewController {
         myAlert.addAction(okAction)
         self.present(myAlert, animated: true, completion: nil)
     }
-
+    
     // MARK: - action
-    @IBAction func add(_ sender: Any) {
+    @IBAction func done(_ sender: Any) {
+        
         let index = IndexPath(row: 0, section: 0)
         let cell = self.tableView.cellForRow(at: index) as! FirstCustomCell
         
-        let index2 = IndexPath(row: 1, section: 0)
-        let cell2 = self.tableView.cellForRow(at: index2) as! SecondCustomCell
-        
         let newCategory = Insentive()
         
-        //空判定
         guard let text = cell.textField.text, !text.isEmpty else {
             displayMyAlertMessage(userMessage: "ご褒美を入力してください")
             return
         }
-        guard let text = cell2.textField.text, !text.isEmpty else {
-            displayMyAlertMessage(userMessage: "消費ポイントを選択してください")
-            return
-        }
         
         newCategory.title = cell.textField.text!
-        newCategory.point = Int(cell2.textField.text!)!
+        newCategory.point = pickerValue
         
         self.save(insentive: newCategory)
-
-        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "load"), object: nil)
         
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "load"), object: nil)
         dismiss(animated: true, completion: nil)
     }
     
     @IBAction func back(_ sender: Any) {
         
         dismiss(animated: true, completion: nil)
-
     }
     
 }
 
-// MARK: - pickerView
 extension EditInsentiveViewController: UIPickerViewDelegate,UIPickerViewDataSource {
-   
+    
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
     }
@@ -120,14 +95,13 @@ extension EditInsentiveViewController: UIPickerViewDelegate,UIPickerViewDataSour
     }
     
     func pickerView( _ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        let index2 = IndexPath(row: 1, section: 0)
-        let cell2 = self.tableView.cellForRow(at: index2) as! SecondCustomCell
         
-        cell2.textField.text = String(dataList[row])
+        pickerValue = dataList[row]
     }
 }
 
 extension EditInsentiveViewController: UITableViewDelegate,UITableViewDataSource {
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 2
     }
@@ -137,14 +111,17 @@ extension EditInsentiveViewController: UITableViewDelegate,UITableViewDataSource
         if indexPath.row == 0 {
             let cell = tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! FirstCustomCell
             cell.selectionStyle = UITableViewCell.SelectionStyle.none
-            cell.label.text = "ご褒美"
+            cell.backgroundColor = .secondarySystemBackground
             return cell
         }
         else {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "customCell2", for: indexPath) as! SecondCustomCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "customCell2", for: indexPath) as! PickerViewCell
             cell.selectionStyle = UITableViewCell.SelectionStyle.none
-            cell.textField.inputView = thePicker
+            cell.picker.delegate = self
+            cell.picker.dataSource = self
+            cell.backgroundColor = .secondarySystemBackground
             cell.label.text = "消費ポイント"
+            
             return cell
         }
         

@@ -8,9 +8,11 @@
 import UIKit
 import RealmSwift
 import Instructions
+import ChameleonFramework
 
 class CategoryViewController: UIViewController{
     
+    @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
     @IBOutlet weak var pointLabel: UIBarButtonItem!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var addGoal: UIBarButtonItem!
@@ -19,10 +21,13 @@ class CategoryViewController: UIViewController{
     var titleString: String?
     var categories: Results<Category>?
     let coachMarksController = CoachMarksController()
+    let userDefaults = UserDefaults.standard
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         loadCategories()
+        view.backgroundColor = .systemBackground
         self.coachMarksController.dataSource = self
         firstLaunch()
         setTableView()
@@ -31,28 +36,32 @@ class CategoryViewController: UIViewController{
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        //pointLabelに表示
+        
         let savedNumber = UserDefaults.standard.integer(forKey: "currentValue")
         pointLabel.title = String(savedNumber)
     }
     
-    
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        tableViewHeight.constant = tableView.rowHeight * CGFloat(categories!.count)
+    }
     
     func setTableView() {
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.rowHeight = view.frame.height / 9
+        tableView.rowHeight = view.frame.height / 10
         tableView.separatorStyle = .none
+//        tableView.layer.cornerRadius = 20
         tableView.register(UINib(nibName: "CustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
         tableView.register(UINib(nibName: "InfoCell", bundle: nil), forCellReuseIdentifier: "infoCell")
     }
     
     func firstLaunch() {
-        let launchCategory = UserDefaults.standard.bool(forKey: "launchCategory")
+        let launchCategory = userDefaults.bool(forKey: "launchCategory")
         if launchCategory == true {
             return
         } else {
-            UserDefaults.standard.set(true, forKey: "launchCategory")
+            userDefaults.set(true, forKey: "launchCategory")
             self.coachMarksController.start(in: .window(over: self))
         }
     }
@@ -60,8 +69,9 @@ class CategoryViewController: UIViewController{
     @objc func loadList(notification: NSNotification){
         //load data here
         self.tableView.reloadData()
-        let savedNumber = UserDefaults.standard.integer(forKey: "currentValue")
+        let savedNumber = userDefaults.integer(forKey: "currentValue")
         pointLabel.title = String(savedNumber)
+        tableViewHeight.constant = tableView.rowHeight * CGFloat(categories!.count)
     }
     
     
@@ -95,13 +105,12 @@ class CategoryViewController: UIViewController{
         }
     }
     
-    // MARK: - action
+    
     @IBAction func addButton(_ sender: Any) {
         performSegue(withIdentifier: "goToEdit", sender: nil)
     }
     
     @IBAction func pointPressed(_ sender: Any) {
-        
         performSegue(withIdentifier: "goToEditPoint", sender: nil)
     }
     
@@ -114,57 +123,50 @@ class CategoryViewController: UIViewController{
             }
             destinationVC.title = titleString
         }
+        
+        if segue.identifier == "goToEditPoint" {
+            
+            let nav = segue.destination as! UINavigationController
+            let destinationVC = nav.topViewController as! EditPointViewController
+            destinationVC.pickerValue = userDefaults.integer(forKey: "currentValue")
+        }
     }
+    
 }
 
-// MARK: - tableView delegate
 extension CategoryViewController: UITableViewDelegate,UITableViewDataSource {
     
-    func numberOfSections(in tableView: UITableView) -> Int {
-        return 2
-    }
-    
-    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-       
-        if section == 0 {
-            return 1
-        }else {
-            return categories?.count ?? 1
-        }
+        return categories?.count ?? 1
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        if indexPath.section == 0 {
-            let cell = self.tableView.dequeueReusableCell(withIdentifier: "infoCell", for: indexPath) as! InfoCell
-            cell.label.text = "追加したカテゴリーをタップで、タスク追加画面へ。または、左ワイプで削除。"
-            cell.selectionStyle = UITableViewCell.SelectionStyle.none
-            
-            return cell
-        }else {
-            let cell = self.tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! CustomCell
-            cell.label.text = categories?[indexPath.row].name ?? "No Categories added yet"
-            cell.pointLabel.isHidden = true
-            cell.layer.cornerRadius = 10
-            cell.selectionStyle = UITableViewCell.SelectionStyle.none
-            
-            return cell
+        let cell = self.tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! CustomCell
+        cell.label.text = categories?[indexPath.row].name ?? "No Categories added yet"
+        cell.pointLabel.isHidden = true
+        cell.selectionStyle = UITableViewCell.SelectionStyle.none
+        
+        let color = UIColor.systemTeal
+        
+        if let colour = color.darken(byPercentage: CGFloat(indexPath.row) / CGFloat(categories!.count)) {
+            cell.backgroundColor = colour
+            cell.icon.tintColor = ContrastColorOf(colour, returnFlat: true)
+            cell.label.textColor = ContrastColorOf(colour, returnFlat: true)
         }
         
-        
+        let lastRowIndex = tableView.numberOfRows(inSection: tableView.numberOfSections-1)
+        if (indexPath.row == lastRowIndex - 1) {
+            cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
+        }
+        return cell
     }
     
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        if indexPath.section == 0 {
-            return
-        }else {
         titleString = categories?[indexPath.row].name
         performSegue(withIdentifier: "goToItems", sender: self)
-        }
-        
     }
     
     
@@ -176,16 +178,8 @@ extension CategoryViewController: UITableViewDelegate,UITableViewDataSource {
         }
     }
     
-    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        if indexPath.section == 0 { return false }
-        return true
-    }
-    
-    
-    
 }
 
-// MARK: - instructions
 extension CategoryViewController: CoachMarksControllerDataSource, CoachMarksControllerDelegate {
     
     func coachMarksController(_ coachMarksController: CoachMarksController, coachMarkViewsAt index: Int, madeFrom coachMark: CoachMark) -> (bodyView: (UIView & CoachMarkBodyView), arrowView: (UIView & CoachMarkArrowView)?) {

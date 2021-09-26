@@ -11,10 +11,9 @@ import RealmSwift
 class EditTaskViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
     
-    let thePicker = UIPickerView()
     let dataList = [Int](arrayLiteral: 1,2,3,4,5)
+    var pickerValue:Int = 1
     var toDoItems: Results<Item>?
     let realm = try! Realm()
     var selectedCategory: Category? {
@@ -25,33 +24,26 @@ class EditTaskViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .systemBackground
+        setTableView()
+        isModalInPresentation = true
+    }
+    
+    func setTableView() {
         tableView.delegate = self
         tableView.dataSource = self
-        thePicker.delegate = self
-        tableView.layer.cornerRadius = 10
-        tableView.separatorStyle = .none
         tableView.isScrollEnabled = false
-        tableView.rowHeight = view.frame.height / 9
-        isModalInPresentation = true
-        self.tableView.tableFooterView = UIView()
+        tableView.rowHeight = 60
+        tableView.backgroundColor = .systemBackground
         tableView.register(UINib(nibName: "FirstCustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
-        tableView.register(UINib(nibName: "SecondCustomCell", bundle: nil), forCellReuseIdentifier: "customCell2")
-        
-        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
-                self.navigationController?.navigationBar.shadowImage = UIImage()
+        tableView.register(UINib(nibName: "PickerViewCell", bundle: nil), forCellReuseIdentifier: "customCell2")
     }
     
-    override func viewWillLayoutSubviews() {
-        super.viewWillLayoutSubviews()
-        tableViewHeight.constant = view.frame.height / 3
-    }
-    
-    // MARK: - data
     func loadItems() {
         toDoItems = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
     }
     
-    // MARK: - alert
+    
     func displayMyAlertMessage(userMessage:String){
         
         let myAlert = UIAlertController(title: "入力内容を確認してください", message: userMessage, preferredStyle: UIAlertController.Style.alert)
@@ -60,18 +52,15 @@ class EditTaskViewController: UIViewController {
         self.present(myAlert, animated: true, completion: nil)
     }
     
-    // MARK: - action
     @IBAction func back(_ sender: Any) {
         
         self.dismiss(animated: true, completion: nil)
     }
     
-    @IBAction func addButtonPressed(_ sender: Any) {
+    @IBAction func done(_ sender: Any) {
+        
         let index = IndexPath(row: 0, section: 0)
         let cell = self.tableView.cellForRow(at: index) as! FirstCustomCell
-        
-        let index2 = IndexPath(row: 1, section: 0)
-        let cell2 = self.tableView.cellForRow(at: index2) as! SecondCustomCell
         
         if let currentCategory = selectedCategory {
             do {
@@ -82,13 +71,9 @@ class EditTaskViewController: UIViewController {
                         displayMyAlertMessage(userMessage: "タスクを入力してください")
                         return
                     }
-                    guard let text = cell2.textField.text, !text.isEmpty else {
-                        displayMyAlertMessage(userMessage: "獲得ポイントを選択してください")
-                        return
-                    }
                     
                     newItem.title = cell.textField.text!
-                    newItem.getPoint = Int(cell2.textField.text!)!
+                    newItem.getPoint = pickerValue
                     
                     newItem.dateCreated = Date()
                     currentCategory.items.append(newItem)
@@ -105,7 +90,7 @@ class EditTaskViewController: UIViewController {
     
 }
 
-// MARK: - pickerView
+
 extension EditTaskViewController: UIPickerViewDelegate,UIPickerViewDataSource {
     
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
@@ -122,14 +107,27 @@ extension EditTaskViewController: UIPickerViewDelegate,UIPickerViewDataSource {
     
     func pickerView( _ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         
-        let index2 = IndexPath(row: 1, section: 0)
-        let cell2 = self.tableView.cellForRow(at: index2) as! SecondCustomCell
+//        if row == 0 {
+//            pickerData = 1
+//        } else if row == 1 {
+//            pickerData = 2
+//        } else if row == 2 {
+//            pickerData = 3
+//        } else if row == 3 {
+//            pickerData = 4
+//        } else if row == 4 {
+//            pickerData = 5
+//        }
         
-        cell2.textField.text = String(dataList[row])
+        pickerValue = dataList[row]
+
+        
     }
+    
 }
 
 extension EditTaskViewController: UITableViewDelegate,UITableViewDataSource {
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 2
     }
@@ -139,15 +137,16 @@ extension EditTaskViewController: UITableViewDelegate,UITableViewDataSource {
         if indexPath.row == 0 {
             let cell = tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! FirstCustomCell
             cell.selectionStyle = UITableViewCell.SelectionStyle.none
-            cell.label.text = "タスク"
-
+            cell.backgroundColor = .secondarySystemBackground
             return cell
         }
         else {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "customCell2", for: indexPath) as! SecondCustomCell
-            cell.textField.inputView = thePicker
+            let cell = tableView.dequeueReusableCell(withIdentifier: "customCell2", for: indexPath) as! PickerViewCell
             cell.selectionStyle = UITableViewCell.SelectionStyle.none
-
+            cell.picker.delegate = self
+            cell.picker.dataSource = self
+            cell.backgroundColor = .secondarySystemBackground
+            
             return cell
         }
         

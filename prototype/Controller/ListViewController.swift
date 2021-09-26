@@ -8,17 +8,20 @@
 import UIKit
 import RealmSwift
 import Instructions
+import ChameleonFramework
 
 class ListViewController: UIViewController,UITextFieldDelegate {
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var pointLabel: UIBarButtonItem!
     @IBOutlet weak var addButton: UIBarButtonItem!
+    @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
     
     let coachMarksController = CoachMarksController()
     var currentPoint = 0
     var toDoItems: Results<Item>?
     let realm = try! Realm()
+    let userDefaults = UserDefaults.standard
     var selectedCategory: Category? {
         didSet {
             loadItems()
@@ -27,7 +30,8 @@ class ListViewController: UIViewController,UITextFieldDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-       setTableView()
+        setTableView()
+        view.backgroundColor = .systemBackground
         NotificationCenter.default.addObserver(self, selector: #selector(loadList), name: NSNotification.Name(rawValue: "load"), object: nil)
         self.coachMarksController.dataSource = self
         firstLaunch()
@@ -35,11 +39,10 @@ class ListViewController: UIViewController,UITextFieldDelegate {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        //pointLabelに表示
-        let savedNumber = UserDefaults.standard.integer(forKey: "currentValue")
+        
+        let savedNumber = userDefaults.integer(forKey: "currentValue")
         pointLabel.title = String(savedNumber)
         tableView.reloadData()
-//        self.coachMarksController.start(in: .window(over: self))
     }
     
     func setTableView() {
@@ -49,15 +52,14 @@ class ListViewController: UIViewController,UITextFieldDelegate {
         tableView.register(UINib(nibName: "CustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
         tableView.register(UINib(nibName: "InfoCell", bundle: nil), forCellReuseIdentifier: "infoCell")
         tableView.separatorStyle = .none
-        self.tableView.tableFooterView = UIView()
     }
     
     func firstLaunch() {
-        let launchList = UserDefaults.standard.bool(forKey: "launchList")
+        let launchList = userDefaults.bool(forKey: "launchList")
         if launchList == true {
             return
         } else {
-            UserDefaults.standard.set(true, forKey: "launchList")
+            userDefaults.set(true, forKey: "launchList")
             self.coachMarksController.start(in: .window(over: self))
         }
     }
@@ -65,17 +67,15 @@ class ListViewController: UIViewController,UITextFieldDelegate {
     @objc func loadList(notification: NSNotification){
         //load data here
         self.tableView.reloadData()
-        let savedNumber = UserDefaults.standard.integer(forKey: "currentValue")
+        let savedNumber = userDefaults.integer(forKey: "currentValue")
         pointLabel.title = String(savedNumber)
     }
     
-    
-    
-    // MARK: - data
+  
     func loadItems() {
         toDoItems = selectedCategory?.items.sorted(byKeyPath: "title", ascending: true)
     }
-    
+ 
     func updateModel(at indexPath: IndexPath) {
         if let item = toDoItems?[indexPath.row] {
             do {
@@ -88,9 +88,8 @@ class ListViewController: UIViewController,UITextFieldDelegate {
         }
     }
     
-    // MARK: - alert
     func showDeleteWarning(for indexPath: IndexPath) {
-        //Create the alert controller and actions
+
         let alert = UIAlertController(title: "タスクを完了しますか？", message: "OKを選択するとポイントが加算されます", preferredStyle: .alert)
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
         let okAction = UIAlertAction(title: "OK", style: .destructive) { _ in
@@ -98,11 +97,9 @@ class ListViewController: UIViewController,UITextFieldDelegate {
                 self.Calculation(for: indexPath)
             }
         }
-        //Add the actions to the alert controller
         alert.addAction(cancelAction)
         alert.addAction(okAction)
         
-        //Present the alert controller
         present(alert, animated: true, completion: nil)
         
     }
@@ -124,6 +121,26 @@ class ListViewController: UIViewController,UITextFieldDelegate {
             let destinationVC = nav.topViewController as! EditTaskViewController
             destinationVC.selectedCategory = self.selectedCategory
         }
+        
+        if segue.identifier == "goToEditPoint" {
+            
+            let nav = segue.destination as! UINavigationController
+            
+            let destinationVC = nav.topViewController as! EditPointViewController
+            destinationVC.pickerValue = userDefaults.integer(forKey: "currentValue")
+        }
+        
+    }
+    
+    func Calculation(for indexPath: IndexPath) {
+        
+        if let item = toDoItems?[indexPath.row] {
+            let savedNumber = userDefaults.integer(forKey: "currentValue")
+            currentPoint = savedNumber + item.getPoint
+        }
+        userDefaults.set(currentPoint, forKey: "currentValue")
+        let savedNumber = userDefaults.integer(forKey: "currentValue")
+        pointLabel.title = String(savedNumber)
     }
 }
 
@@ -131,93 +148,62 @@ class ListViewController: UIViewController,UITextFieldDelegate {
 // MARK: - tableView delegate
 extension ListViewController: UITableViewDelegate,UITableViewDataSource {
     
-    
-    func numberOfSections(in tableView: UITableView) -> Int {
-        return 2
-    }
-    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        if section == 0 {
-            return 1
-        }else {
-            return toDoItems?.count ?? 1
-        }
+        return toDoItems?.count ?? 1
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        if indexPath.section == 0 {
-            
-            let cell = self.tableView.dequeueReusableCell(withIdentifier: "infoCell", for: indexPath) as! InfoCell
-            cell.label.text = "追加したタスクをタップで、完了してポイントを加算。または、左ワイプで削除。"
-            cell.selectionStyle = UITableViewCell.SelectionStyle.none
-            
-            return cell
-        }else {
-            let cell = self.tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! CustomCell
-            cell.selectionStyle = UITableViewCell.SelectionStyle.none
-            cell.nextLabel.isHidden = true
-            
-            if let item = toDoItems?[indexPath.row] {
-                cell.label.text = item.title
-                cell.pointLabel.text = String(item.getPoint)
-                
-            } else {
-                cell.textLabel?.text = "No Items Added"
-            }
-            
-            return cell
+        let cell = self.tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! CustomCell
+        cell.selectionStyle = UITableViewCell.SelectionStyle.none
+        cell.icon.image = UIImage(systemName: "circle")
+        cell.colorView.layer.cornerRadius = 20
+        
+        let color = UIColor.systemTeal
+        
+        if let colour = color.darken(byPercentage: CGFloat(indexPath.row) / CGFloat(toDoItems!.count)) {
+            cell.colorView.backgroundColor = colour
+            cell.icon.tintColor = ContrastColorOf(colour, returnFlat: true)
+            cell.pointLabel.textColor = ContrastColorOf(colour, returnFlat: true)
+            cell.label.textColor = ContrastColorOf(colour, returnFlat: true)
         }
         
+        if let item = toDoItems?[indexPath.row] {
+            cell.label.text = item.title
+            cell.pointLabel.text = String(item.getPoint)
+            
+        } else {
+            cell.textLabel?.text = "No Items Added"
+        }
+        
+        return cell
     }
     
-    
-    //Mark - TableView Delegate Methods
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        if indexPath.section == 0 {
-            return
-        }else {
-            showDeleteWarning(for: indexPath)
-            tableView.reloadData()
-            tableView.deselectRow(at: indexPath, animated: true)
-        }
-        
+        showDeleteWarning(for: indexPath)
+        tableView.reloadData()
+        tableView.deselectRow(at: indexPath, animated: true)
     }
     
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-
-            if editingStyle == UITableViewCell.EditingStyle.delete {
-                updateModel(at: indexPath)
-                tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.automatic)
-            }
-    }
-    
-    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        if indexPath.section == 0 { return false }
-        return true
-    }
-    
-    func Calculation(for indexPath: IndexPath) {
-        //currentPointに値を入れる
-        if let item = toDoItems?[indexPath.row] {
-            
-            let savedNumber = UserDefaults.standard.integer(forKey: "currentValue")
-            
-            currentPoint = savedNumber + item.getPoint
-            
+        if editingStyle == UITableViewCell.EditingStyle.delete {
+            updateModel(at: indexPath)
+            tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.automatic)
         }
-        //currentPointをuserDefalutsに保存
-        UserDefaults.standard.set(currentPoint, forKey: "currentValue")
-        //currentPointをnavBarに表示
-        let savedNumber = UserDefaults.standard.integer(forKey: "currentValue")
-        pointLabel.title = String(savedNumber)
     }
+    
+    //    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+    //        if indexPath.section == 0 { return false }
+    //        return true
+    //    }
+    
+    
 }
 
-// MARK: - instructions
+
 extension ListViewController: CoachMarksControllerDataSource, CoachMarksControllerDelegate {
     func coachMarksController(_ coachMarksController: CoachMarksController, coachMarkViewsAt index: Int, madeFrom coachMark: CoachMark) -> (bodyView: (UIView & CoachMarkBodyView), arrowView: (UIView & CoachMarkArrowView)?) {
         

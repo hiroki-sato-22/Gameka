@@ -6,48 +6,38 @@
 //
 
 import UIKit
-import Instructions
-
 
 class EditPointViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
-    
-    let coachMarksController = CoachMarksController()
+        
+    let array = [Int](1...200)
+    let userDefaults = UserDefaults.standard
+    var pickerValue:Int = 1
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.rowHeight = view.frame.height / 9
-        tableView.separatorStyle = .none
-        tableView.layer.cornerRadius = 10
-        tableView.isScrollEnabled = false
-
-        tableView.register(UINib(nibName: "FirstCustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
-        self.tableView.tableFooterView = UIView()
-       
-        addNumberPadDoneButton()
-//        self.coachMarksController.dataSource = self
-//        firstLaunch()
+        view.backgroundColor = .systemBackground
+        setTableView()
         isModalInPresentation = true
-        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: UIBarMetrics.default)
-                self.navigationController?.navigationBar.shadowImage = UIImage()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         let index = IndexPath(row: 0, section: 0)
-        let cell = self.tableView.cellForRow(at: index) as! FirstCustomCell
-        
-        let savedNumber = UserDefaults.standard.integer(forKey: "currentValue")
-        cell.textField.text = String(savedNumber)
+        let cell = self.tableView.cellForRow(at: index) as! LargePickerCell
+        cell.picker.selectRow(Int(pickerValue - 1), inComponent: 0, animated: true)
     }
     
-    override func viewWillLayoutSubviews() {
-        super.viewWillLayoutSubviews()
-        tableViewHeight.constant = view.frame.height / 4
+    
+    func setTableView() {
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.rowHeight = 100
+        tableView.backgroundColor = .systemBackground
+        tableView.isScrollEnabled = false
+        tableView.tableFooterView = UIView()
+        tableView.register(UINib(nibName: "LargePickerCell", bundle: nil), forCellReuseIdentifier: "pickerCell")
     }
     
     
@@ -69,35 +59,36 @@ class EditPointViewController: UIViewController {
         cell.textField.resignFirstResponder()
     }
     
-    @objc func cencelAction(){
-        let index = IndexPath(row: 0, section: 0)
-        let cell = self.tableView.cellForRow(at: index) as! FirstCustomCell
-        cell.textField.resignFirstResponder()
-    }
+//    @objc func cencelAction(){
+//        let index = IndexPath(row: 0, section: 0)
+//        let cell = self.tableView.cellForRow(at: index) as! FirstCustomCell
+//        cell.textField.resignFirstResponder()
+//    }
     
-    // MARK: - data
-    func addNumberPadDoneButton(){
-        let index = IndexPath(row: 0, section: 0)
-        let cell = self.tableView.cellForRow(at: index) as! FirstCustomCell
-        let toolbar: UIToolbar = UIToolbar()
-        let space = UIBarButtonItem(barButtonSystemItem: .flexibleSpace,
-                                    target: nil,
-                                    action: nil)
-        let done = UIBarButtonItem(title: "完了",
-                                   style: .done,
-                                   target: self,
-                                   action: #selector(doneAction))
-        let cancel = UIBarButtonItem(title: "戻る",
-                                     style: .done,
-                                     target: self,
-                                     action: #selector(cencelAction))
-        toolbar.items = [cancel, space, done]
-        toolbar.sizeToFit()
-        cell.textField.inputAccessoryView = toolbar
-        cell.textField.keyboardType = .numberPad
-    }
+
+//    func addNumberPadDoneButton(){
+//        let index = IndexPath(row: 0, section: 0)
+//        let cell = self.tableView.cellForRow(at: index) as! FirstCustomCell
+//
+//        let toolbar: UIToolbar = UIToolbar()
+//        let space = UIBarButtonItem(barButtonSystemItem: .flexibleSpace,
+//                                    target: nil,
+//                                    action: nil)
+//        let done = UIBarButtonItem(title: "完了",
+//                                   style: .done,
+//                                   target: self,
+//                                   action: #selector(doneAction))
+//        let cancel = UIBarButtonItem(title: "戻る",
+//                                     style: .done,
+//                                     target: self,
+//                                     action: #selector(cencelAction))
+//        toolbar.items = [cancel, space, done]
+//        toolbar.sizeToFit()
+//        cell.textField.inputAccessoryView = toolbar
+//        cell.textField.keyboardType = .numberPad
+//    }
     
-    // MARK: - alert
+  
     func displayMyAlertMessage(userMessage:String){
         
         let myAlert = UIAlertController(title: "入力内容を確認してください", message: userMessage, preferredStyle: UIAlertController.Style.alert)
@@ -106,68 +97,62 @@ class EditPointViewController: UIViewController {
         self.present(myAlert, animated: true, completion: nil)
     }
     
-    // MARK: - action
+    @IBAction func done(_ sender: Any) {
+        
+        userDefaults.set(pickerValue, forKey: "currentValue")
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "load"), object: nil)
+        dismiss(animated: true, completion: nil)
+    }
+    
     @IBAction func back(_ sender: Any) {
         
-        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "load"), object: nil)
+        
         dismiss(animated: true, completion: nil)
     }
     
 }
 
-
-// MARK: - instructions
-//extension EditPointViewController: CoachMarksControllerDataSource, CoachMarksControllerDelegate {
-//    func coachMarksController(_ coachMarksController: CoachMarksController, coachMarkViewsAt index: Int, madeFrom coachMark: CoachMark) -> (bodyView: (UIView & CoachMarkBodyView), arrowView: (UIView & CoachMarkArrowView)?) {
-//
-//
-//        let coachViews = coachMarksController.helper.makeDefaultCoachViews(
-//            withArrow: true,
-//            arrowOrientation: coachMark.arrowOrientation
-//        )
-//
-//        switch index {
-//        case 0:
-//            coachViews.bodyView.hintLabel.text = "数字をタップで所持ポイントを編集できます"
-//            coachViews.bodyView.nextLabel.text = "OK"
-//
-//        default:
-//            break
-//
-//        }
-//
-//
-//        return (bodyView: coachViews.bodyView, arrowView: coachViews.arrowView)
-//    }
-//
-//
-//    func coachMarksController(_ coachMarksController: CoachMarksController, coachMarkAt index: Int) -> CoachMark {
-//        let index2 = IndexPath(row: 0, section: 0)
-//        let cell = self.tableView.cellForRow(at: index2) as! FirstCustomCell
-//        let highlightViews: Array<UIView> = [
-//            cell.textField
-//        ]
-//
-//        return coachMarksController.helper.makeCoachMark(for: highlightViews[index])
-//    }
-//
-//    func numberOfCoachMarks(for coachMarksController: CoachMarksController) -> Int {
-//        return 1
-//    }
-//
-//
-//}
-
 extension EditPointViewController: UITableViewDelegate,UITableViewDataSource {
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 1
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = self.tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! FirstCustomCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "pickerCell", for: indexPath) as! LargePickerCell
         cell.selectionStyle = UITableViewCell.SelectionStyle.none
-        cell.label.text = "所持ポイント"
+        cell.picker.delegate = self
+        cell.picker.dataSource = self
+        cell.backgroundColor = .secondarySystemBackground
+
+        
         return cell
     }
+    
 }
 
+extension EditPointViewController: UIPickerViewDelegate,UIPickerViewDataSource {
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        
+        return array.count
+    }
+    
+    func pickerView(_ pickerView: UIPickerView,
+                    titleForRow row: Int,
+                    forComponent component: Int) -> String? {
+        
+        return String(array[row])
+    }
+    
+    func pickerView(_ pickerView: UIPickerView,
+                    didSelectRow row: Int,
+                    inComponent component: Int) {
+        
+        pickerValue = array[row]
+    }
+    
+}
