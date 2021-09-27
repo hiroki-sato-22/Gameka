@@ -2,7 +2,7 @@
 //  LargePickerCell.swift
 //  prototype
 //
-//  Created by hiroki sato on 2021/09/24.
+//  Created by hiroki sato on 2021/09/27.
 //
 
 import UIKit
@@ -10,7 +10,6 @@ import UIKit
 class LargePickerCell: UITableViewCell {
 
     @IBOutlet weak var picker: UIPickerView!
-    
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
