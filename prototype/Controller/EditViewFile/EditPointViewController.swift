@@ -11,7 +11,7 @@ class EditPointViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
         
-    let array = [Int](1...200)
+    let array = [Int](0...200)
     let userDefaults = UserDefaults.standard
     var pickerValue:Int = 1
     
@@ -33,7 +33,7 @@ class EditPointViewController: UIViewController {
     func setTableView() {
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.rowHeight = 100
+//        tableView.rowHeight = 100
         tableView.backgroundColor = .systemBackground
         tableView.isScrollEnabled = false
         tableView.tableFooterView = UIView()
@@ -58,35 +58,6 @@ class EditPointViewController: UIViewController {
         UserDefaults.standard.set(savedNumber, forKey: "currentValue")
         cell.textField.resignFirstResponder()
     }
-    
-//    @objc func cencelAction(){
-//        let index = IndexPath(row: 0, section: 0)
-//        let cell = self.tableView.cellForRow(at: index) as! FirstCustomCell
-//        cell.textField.resignFirstResponder()
-//    }
-    
-
-//    func addNumberPadDoneButton(){
-//        let index = IndexPath(row: 0, section: 0)
-//        let cell = self.tableView.cellForRow(at: index) as! FirstCustomCell
-//
-//        let toolbar: UIToolbar = UIToolbar()
-//        let space = UIBarButtonItem(barButtonSystemItem: .flexibleSpace,
-//                                    target: nil,
-//                                    action: nil)
-//        let done = UIBarButtonItem(title: "完了",
-//                                   style: .done,
-//                                   target: self,
-//                                   action: #selector(doneAction))
-//        let cancel = UIBarButtonItem(title: "戻る",
-//                                     style: .done,
-//                                     target: self,
-//                                     action: #selector(cencelAction))
-//        toolbar.items = [cancel, space, done]
-//        toolbar.sizeToFit()
-//        cell.textField.inputAccessoryView = toolbar
-//        cell.textField.keyboardType = .numberPad
-//    }
     
   
     func displayMyAlertMessage(userMessage:String){
@@ -124,7 +95,6 @@ extension EditPointViewController: UITableViewDelegate,UITableViewDataSource {
         cell.picker.delegate = self
         cell.picker.dataSource = self
         cell.backgroundColor = .secondarySystemBackground
-
         
         return cell
     }

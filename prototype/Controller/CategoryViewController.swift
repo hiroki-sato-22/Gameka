@@ -12,26 +12,31 @@ import ChameleonFramework
 
 class CategoryViewController: UIViewController{
     
-    @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
     @IBOutlet weak var pointLabel: UIBarButtonItem!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var addGoal: UIBarButtonItem!
     
+    let coachMarksController = CoachMarksController()
     let realm = try! Realm()
     var titleString: String?
     var categories: Results<Category>?
-    let coachMarksController = CoachMarksController()
     let userDefaults = UserDefaults.standard
     
+    let searchController = UISearchController(searchResultsController: nil)
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setTableView()
         loadCategories()
         view.backgroundColor = .systemBackground
-        self.coachMarksController.dataSource = self
-        firstLaunch()
-        setTableView()
         NotificationCenter.default.addObserver(self, selector: #selector(loadList), name: NSNotification.Name(rawValue: "load"), object: nil)
+        self.coachMarksController.dataSource = self
+        setSearchController()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        firstLaunch()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -41,24 +46,25 @@ class CategoryViewController: UIViewController{
         pointLabel.title = String(savedNumber)
     }
     
-    override func viewWillLayoutSubviews() {
-        super.viewWillLayoutSubviews()
-        tableViewHeight.constant = tableView.rowHeight * CGFloat(categories!.count)
+    func setSearchController(){
+        searchController.searchResultsUpdater = self
+        navigationItem.hidesSearchBarWhenScrolling = true
+        navigationItem.searchController = searchController
     }
     
     func setTableView() {
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.rowHeight = view.frame.height / 10
+        tableView.keyboardDismissMode = .onDrag
+//        tableView.rowHeight = view.frame.height / 10
+        tableView.rowHeight = UITableView.automaticDimension
         tableView.separatorStyle = .none
-//        tableView.layer.cornerRadius = 20
         tableView.register(UINib(nibName: "CustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
-        tableView.register(UINib(nibName: "InfoCell", bundle: nil), forCellReuseIdentifier: "infoCell")
     }
     
     func firstLaunch() {
         let launchCategory = userDefaults.bool(forKey: "launchCategory")
-        if launchCategory == true {
+        if launchCategory {
             return
         } else {
             userDefaults.set(true, forKey: "launchCategory")
@@ -71,11 +77,9 @@ class CategoryViewController: UIViewController{
         self.tableView.reloadData()
         let savedNumber = userDefaults.integer(forKey: "currentValue")
         pointLabel.title = String(savedNumber)
-        tableViewHeight.constant = tableView.rowHeight * CGFloat(categories!.count)
     }
     
     
-    // MARK: - data
     func save(category: Category) {
         do {
             try realm.write {
@@ -142,6 +146,7 @@ extension CategoryViewController: UITableViewDelegate,UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
+        
         let cell = self.tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! CustomCell
         cell.label.text = categories?[indexPath.row].name ?? "No Categories added yet"
         cell.pointLabel.isHidden = true
@@ -160,6 +165,8 @@ extension CategoryViewController: UITableViewDelegate,UITableViewDataSource {
             cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
         }
         return cell
+        
+        
     }
     
     
@@ -175,6 +182,23 @@ extension CategoryViewController: UITableViewDelegate,UITableViewDataSource {
         if editingStyle == UITableViewCell.EditingStyle.delete {
             updateModel(at: indexPath)
             tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.automatic)
+        }
+    }
+    
+}
+
+extension CategoryViewController: UISearchResultsUpdating{
+    
+    func updateSearchResults(for searchController: UISearchController
+    ) {
+        categories = categories?.filter("name CONTAINS[cd] %@", searchController.searchBar.text!).sorted(byKeyPath: "name", ascending: true)
+        tableView.reloadData()
+        
+        if searchController.searchBar.text?.count == 0 {
+            loadCategories()
+            //            DispatchQueue.main.async {
+            //                searchBar.resignFirstResponder()
+            //            }
         }
     }
     
@@ -211,8 +235,6 @@ extension CategoryViewController: CoachMarksControllerDataSource, CoachMarksCont
     
     func coachMarksController(_ coachMarksController: CoachMarksController, coachMarkAt index: Int) -> CoachMark {
         
-        
-        
         let highlightViews: Array<UIView> = [
             addGoal.value(forKey: "view") as! UIView,
             pointLabel.value(forKey: "view") as! UIView,
@@ -226,3 +248,16 @@ extension CategoryViewController: CoachMarksControllerDataSource, CoachMarksCont
     }
 }
 
+extension UIViewController {
+    func hideKeyboardWhenTappedAround() {
+        let tapGesture = UITapGestureRecognizer(target: self,
+                                                action: #selector(hideKeyboard))
+        view.addGestureRecognizer(tapGesture)
+        tapGesture.cancelsTouchesInView = false
+    }
+    
+    @objc func hideKeyboard() {
+        view.endEditing(true)
+        
+    }
+}

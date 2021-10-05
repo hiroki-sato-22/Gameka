@@ -16,10 +16,6 @@ class FirstCustomCell: UITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         
-//        textField.borderStyle = .none
-//        textField.layer.cornerRadius = 10
-//        textField.textAlignment = .center
-//        colorView.layer.cornerRadius = 10
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {

@@ -22,6 +22,8 @@ class InsentiveViewController: UIViewController {
     let userDefaults = UserDefaults.standard
     var insentives: Results<Insentive>?
     var currentPoint = 0
+    let searchController = UISearchController(searchResultsController: nil)
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,6 +32,11 @@ class InsentiveViewController: UIViewController {
         setTableView()
         NotificationCenter.default.addObserver(self, selector: #selector(loadList), name: NSNotification.Name(rawValue: "load"), object: nil)
         self.coachMarksController.dataSource = self
+        setSearchController()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         firstLaunch()
     }
     
@@ -39,12 +46,18 @@ class InsentiveViewController: UIViewController {
         pointLabel.title = String(savedNumber)
     }
     
+    func setSearchController(){
+        searchController.searchResultsUpdater = self
+        navigationItem.hidesSearchBarWhenScrolling = true
+        navigationItem.searchController = searchController
+    }
+    
     func setTableView() {
-        tableView.rowHeight = view.frame.height / 9
         tableView.delegate = self
         tableView.dataSource = self
+        tableView.keyboardDismissMode = .onDrag
         tableView.register(UINib(nibName: "CustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
-        tableView.register(UINib(nibName: "InfoCell", bundle: nil), forCellReuseIdentifier: "infoCell")
+//        tableView.register(UINib(nibName: "InfoCell", bundle: nil), forCellReuseIdentifier: "infoCell")
         tableView.separatorStyle = .none
     }
     
@@ -56,7 +69,6 @@ class InsentiveViewController: UIViewController {
     }
     
     func loadInsentives() {
-        
         insentives = realm.objects(Insentive.self)
         tableView.reloadData()
     }
@@ -107,7 +119,7 @@ class InsentiveViewController: UIViewController {
     }
     
     
-    // MARK: - alert
+    
     func showDeleteWarning(for indexPath: IndexPath) {
 
         let alert = UIAlertController(title: "ご褒美を実行しますか？", message: "OKを選択すると所持ポイントから減算されます", preferredStyle: .alert)
@@ -178,7 +190,6 @@ extension InsentiveViewController: UITableViewDelegate,UITableViewDataSource {
             showDeleteWarning(for: indexPath)
             tableView.reloadData()
             tableView.deselectRow(at: indexPath, animated: true)
-        
     }
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
@@ -191,7 +202,24 @@ extension InsentiveViewController: UITableViewDelegate,UITableViewDataSource {
     
 }
 
-// MARK: - instructions
+extension InsentiveViewController: UISearchResultsUpdating{
+    
+    func updateSearchResults(for searchController: UISearchController
+    ) {
+        insentives = insentives?.filter("title CONTAINS[cd] %@", searchController.searchBar.text!).sorted(byKeyPath: "title", ascending: true)
+        tableView.reloadData()
+        
+        if searchController.searchBar.text?.count == 0 {
+            loadInsentives()
+            //            DispatchQueue.main.async {
+            //                searchBar.resignFirstResponder()
+            //            }
+        }
+    }
+    
+}
+
+
 extension InsentiveViewController: CoachMarksControllerDataSource, CoachMarksControllerDelegate {
     func coachMarksController(_ coachMarksController: CoachMarksController, coachMarkViewsAt index: Int, madeFrom coachMark: CoachMark) -> (bodyView: (UIView & CoachMarkBodyView), arrowView: (UIView & CoachMarkArrowView)?) {
         

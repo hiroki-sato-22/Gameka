@@ -59,7 +59,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="frq-6p-cH8" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="6660.8695652173919" y="-1358.0357142857142"/>
+            <point key="canvasLocation" x="4801" y="-1412"/>
         </scene>
         <!--タスクを追加-->
         <scene sceneID="2fh-nx-2r5">
@@ -119,7 +119,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="W8H-bP-W3q" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="6723" y="-694"/>
+            <point key="canvasLocation" x="6475" y="-703"/>
         </scene>
         <!--List View Controller-->
         <scene sceneID="GdA-Rt-PS4">
@@ -183,14 +183,14 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="m1D-ny-3sm" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="5158" y="-703"/>
+            <point key="canvasLocation" x="4800" y="-703"/>
         </scene>
         <!--Tab Bar Controller-->
         <scene sceneID="wO2-9t-AU5">
             <objects>
                 <tabBarController automaticallyAdjustsScrollViewInsets="NO" id="CRP-JW-atA" sceneMemberID="viewController">
                     <toolbarItems/>
-                    <tabBar key="tabBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="S2E-Ea-vjl" customClass="CustomTabBar" customModule="prototype" customModuleProvider="target">
+                    <tabBar key="tabBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="S2E-Ea-vjl">
                         <rect key="frame" x="0.0" y="0.0" width="1000" height="1000"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </tabBar>
@@ -202,7 +202,7 @@
                 </tabBarController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="PAz-st-8Qz" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2541" y="-703"/>
+            <point key="canvasLocation" x="2480" y="-703"/>
         </scene>
         <!--所持ポイントを編集-->
         <scene sceneID="jBS-4e-wZ5">
@@ -254,7 +254,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="8qg-Yj-9Yi" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="5311.594202898551" y="105.80357142857143"/>
+            <point key="canvasLocation" x="6520" y="-5"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="MYo-WU-RZe">
@@ -280,7 +280,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="WyC-RG-Vtw" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2541" y="2"/>
+            <point key="canvasLocation" x="2480" y="-5"/>
         </scene>
         <!--ご褒美-->
         <scene sceneID="826-85-aEx">
@@ -290,18 +290,18 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="rO3-2r-ZnT">
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="insetGrouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" translatesAutoresizingMaskIntoConstraints="NO" id="rO3-2r-ZnT">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="896" id="7nc-aI-ZkM"/>
                                 </constraints>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="Cell" id="wl7-am-KXN" customClass="CustomViewCell" customModule="prototype" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="44.5" width="414" height="43.5"/>
+                                        <rect key="frame" x="20" y="32" width="374" height="43.5"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="wl7-am-KXN" id="WfD-1B-ZIS">
-                                            <rect key="frame" x="0.0" y="0.0" width="414" height="43.5"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="374" height="43.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </tableViewCellContentView>
                                     </tableViewCell>
@@ -342,7 +342,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="i0m-xe-nra" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3368.8000000000002" y="16.995073891625616"/>
+            <point key="canvasLocation" x="3241" y="-5"/>
         </scene>
         <!--ご褒美を追加-->
         <scene sceneID="EKH-ht-hdU">
@@ -402,7 +402,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="MHR-38-g4k" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="4091" y="813"/>
+            <point key="canvasLocation" x="4799" y="-5"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="xKk-DE-mxj">
@@ -425,7 +425,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="8Dx-VC-RPe" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3368" y="813"/>
+            <point key="canvasLocation" x="4054" y="-5"/>
         </scene>
         <!--カテゴリー-->
         <scene sceneID="bwW-2a-gcI">
@@ -435,17 +435,14 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="ug0-9L-Qna">
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="insetGrouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" translatesAutoresizingMaskIntoConstraints="NO" id="ug0-9L-Qna">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="896" id="4HY-Qe-QvG"/>
-                                </constraints>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="szZ-Hb-VKl" customClass="CustomViewCell" customModule="prototype" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="44.5" width="414" height="43.5"/>
+                                        <rect key="frame" x="20" y="32" width="374" height="43.5"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="szZ-Hb-VKl" id="AgT-bA-yI1">
-                                            <rect key="frame" x="0.0" y="0.0" width="414" height="43.5"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="374" height="43.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                         </tableViewCellContentView>
                                     </tableViewCell>
@@ -455,10 +452,10 @@
                         <viewLayoutGuide key="safeArea" id="kkO-Mk-GVI"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="ug0-9L-Qna" firstAttribute="leading" secondItem="F3q-5t-MGR" secondAttribute="leading" id="53F-Lb-MGj"/>
-                            <constraint firstAttribute="bottom" secondItem="ug0-9L-Qna" secondAttribute="bottom" id="9wW-Qv-hw9"/>
-                            <constraint firstItem="ug0-9L-Qna" firstAttribute="top" secondItem="F3q-5t-MGR" secondAttribute="top" id="FWP-LW-deH"/>
-                            <constraint firstAttribute="trailing" secondItem="ug0-9L-Qna" secondAttribute="trailing" id="N5x-UL-NRm"/>
+                            <constraint firstItem="ug0-9L-Qna" firstAttribute="trailing" secondItem="kkO-Mk-GVI" secondAttribute="trailing" id="0SC-ud-FJs"/>
+                            <constraint firstItem="ug0-9L-Qna" firstAttribute="leading" secondItem="kkO-Mk-GVI" secondAttribute="leading" id="c4H-xY-fs7"/>
+                            <constraint firstItem="ug0-9L-Qna" firstAttribute="top" secondItem="F3q-5t-MGR" secondAttribute="top" id="fgb-rv-LUx"/>
+                            <constraint firstAttribute="bottom" secondItem="ug0-9L-Qna" secondAttribute="bottom" id="pA5-Ud-ulN"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="カテゴリー" id="MJt-Ar-yjS">
@@ -479,7 +476,6 @@
                         <outlet property="addGoal" destination="MF0-y4-rlw" id="ffQ-B9-DqK"/>
                         <outlet property="pointLabel" destination="CDE-Pb-5Z0" id="UyV-k2-kDR"/>
                         <outlet property="tableView" destination="ug0-9L-Qna" id="Tf7-9N-abs"/>
-                        <outlet property="tableViewHeight" destination="4HY-Qe-QvG" id="acN-od-J5h"/>
                         <segue destination="iAR-9b-bfJ" kind="presentation" identifier="goToEdit" id="lwt-ve-tb7"/>
                         <segue destination="Plb-DN-l5v" kind="presentation" identifier="goToEditPoint" id="HBT-Rq-73b"/>
                         <segue destination="lrW-Tl-Qpp" kind="show" identifier="goToItems" id="d2o-n0-ubW"/>
@@ -487,7 +483,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="PrJ-ba-nQy" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="4195.652173913044" y="-703.125"/>
+            <point key="canvasLocation" x="4053.6231884057975" y="-703.125"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="UOb-ro-0m7">
@@ -510,7 +506,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="xGT-ZI-Jhv" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="5910.144927536232" y="-1358.0357142857142"/>
+            <point key="canvasLocation" x="4054" y="-1412"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="IcO-Uc-YJJ">
@@ -533,7 +529,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="lIz-Nk-37h" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="5983" y="-694"/>
+            <point key="canvasLocation" x="5616" y="-703"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="SOp-bS-SBH">
@@ -555,7 +551,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="1FK-RY-XEF" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="4197" y="106"/>
+            <point key="canvasLocation" x="5616" y="-5"/>
         </scene>
         <!--設定-->
         <scene sceneID="ish-ug-7v0">
@@ -603,7 +599,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="cFm-ex-lDn" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3289.8550724637685" y="-1410.2678571428571"/>
+            <point key="canvasLocation" x="3243" y="-1412"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="yWb-wZ-ke0">
@@ -619,9 +615,6 @@
                             <fontDescription key="fontDescription" type="system" pointSize="15"/>
                             <color key="textColor" systemColor="labelColor"/>
                         </textAttributes>
-                        <textAttributes key="largeTitleTextAttributes">
-                            <color key="textColor" systemColor="systemTealColor"/>
-                        </textAttributes>
                     </navigationBar>
                     <nil name="viewControllers"/>
                     <connections>
@@ -630,7 +623,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="UMb-zr-5dW" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3439" y="-703"/>
+            <point key="canvasLocation" x="3242" y="-703"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="PGf-ab-yGN">
@@ -649,7 +642,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="bLV-1u-Mms" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2541" y="-1410"/>
+            <point key="canvasLocation" x="2480" y="-1411"/>
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
@@ -668,9 +661,6 @@
         </systemColor>
         <systemColor name="systemGray5Color">
             <color red="0.89803921568627454" green="0.89803921568627454" blue="0.91764705882352937" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </systemColor>
-        <systemColor name="systemTealColor">
-            <color red="0.18823529411764706" green="0.69019607843137254" blue="0.7803921568627451" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

@@ -22,6 +22,7 @@ class EditInsentiveViewController: UIViewController {
         view.backgroundColor = .systemBackground
         setTalbeView()
         isModalInPresentation = true
+        hideKeyboardWhenTappedAround()
     }
     
     func setTalbeView() {
@@ -100,6 +101,14 @@ extension EditInsentiveViewController: UIPickerViewDelegate,UIPickerViewDataSour
     }
 }
 
+extension EditInsentiveViewController: UITextFieldDelegate {
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        
+        textField.resignFirstResponder()
+    }
+}
+
 extension EditInsentiveViewController: UITableViewDelegate,UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -112,6 +121,7 @@ extension EditInsentiveViewController: UITableViewDelegate,UITableViewDataSource
             let cell = tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! FirstCustomCell
             cell.selectionStyle = UITableViewCell.SelectionStyle.none
             cell.backgroundColor = .secondarySystemBackground
+            cell.textField.delegate = self
             return cell
         }
         else {

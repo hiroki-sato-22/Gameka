@@ -15,7 +15,7 @@ class ListViewController: UIViewController,UITextFieldDelegate {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var pointLabel: UIBarButtonItem!
     @IBOutlet weak var addButton: UIBarButtonItem!
-    @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
+//    @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
     
     let coachMarksController = CoachMarksController()
     var currentPoint = 0
@@ -27,6 +27,7 @@ class ListViewController: UIViewController,UITextFieldDelegate {
             loadItems()
         }
     }
+    let searchController = UISearchController(searchResultsController: nil)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,6 +35,11 @@ class ListViewController: UIViewController,UITextFieldDelegate {
         view.backgroundColor = .systemBackground
         NotificationCenter.default.addObserver(self, selector: #selector(loadList), name: NSNotification.Name(rawValue: "load"), object: nil)
         self.coachMarksController.dataSource = self
+        setSearchController()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         firstLaunch()
     }
     
@@ -45,18 +51,26 @@ class ListViewController: UIViewController,UITextFieldDelegate {
         tableView.reloadData()
     }
     
+    func setSearchController(){
+        searchController.searchResultsUpdater = self
+        navigationItem.hidesSearchBarWhenScrolling = true
+        navigationItem.searchController = searchController
+    }
+    
     func setTableView() {
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.rowHeight = view.frame.height / 9
+        tableView.keyboardDismissMode = .onDrag
+//        tableView.rowHeight = view.frame.height / 9
+        tableView.rowHeight = UITableView.automaticDimension
         tableView.register(UINib(nibName: "CustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
-        tableView.register(UINib(nibName: "InfoCell", bundle: nil), forCellReuseIdentifier: "infoCell")
+//        tableView.register(UINib(nibName: "InfoCell", bundle: nil), forCellReuseIdentifier: "infoCell")
         tableView.separatorStyle = .none
     }
     
     func firstLaunch() {
         let launchList = userDefaults.bool(forKey: "launchList")
-        if launchList == true {
+        if launchList {
             return
         } else {
             userDefaults.set(true, forKey: "launchList")
@@ -104,7 +118,7 @@ class ListViewController: UIViewController,UITextFieldDelegate {
         
     }
     
-    // MARK: - action
+
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         
         performSegue(withIdentifier: "goToEditSmallTasks", sender: nil)
@@ -145,7 +159,6 @@ class ListViewController: UIViewController,UITextFieldDelegate {
 }
 
 
-// MARK: - tableView delegate
 extension ListViewController: UITableViewDelegate,UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -195,14 +208,27 @@ extension ListViewController: UITableViewDelegate,UITableViewDataSource {
         }
     }
     
-    //    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-    //        if indexPath.section == 0 { return false }
-    //        return true
-    //    }
-    
-    
 }
 
+
+extension ListViewController: UISearchResultsUpdating{
+    
+    func updateSearchResults(for searchController: UISearchController
+    ) {
+        toDoItems = toDoItems?.filter("title CONTAINS[cd] %@", searchController.searchBar.text!).sorted(byKeyPath: "title", ascending: true)
+        
+        tableView.reloadData()
+        
+        if searchController.searchBar.text?.count == 0 {
+            loadItems()
+            tableView.reloadData()
+            //            DispatchQueue.main.async {
+            //                searchBar.resignFirstResponder()
+            //            }
+        }
+    }
+    
+}
 
 extension ListViewController: CoachMarksControllerDataSource, CoachMarksControllerDelegate {
     func coachMarksController(_ coachMarksController: CoachMarksController, coachMarkViewsAt index: Int, madeFrom coachMark: CoachMark) -> (bodyView: (UIView & CoachMarkBodyView), arrowView: (UIView & CoachMarkArrowView)?) {

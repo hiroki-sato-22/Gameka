@@ -20,14 +20,16 @@ class EditViewController: UIViewController {
         view.backgroundColor = .systemBackground
         setTalbeView()
         isModalInPresentation = true
+        hideKeyboardWhenTappedAround()
     }
     
     func setTalbeView() {
         tableView.delegate = self
         tableView.dataSource = self
+//        tableView.rowHeight = UITableView.automaticDimension
         tableView.rowHeight = 60
         tableView.isScrollEnabled = false
-        tableView.backgroundColor = .systemBackground
+        tableView.backgroundColor = .clear
         tableView.register(UINib(nibName: "FirstCustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
     }
     
@@ -75,6 +77,15 @@ class EditViewController: UIViewController {
         self.dismiss(animated: true, completion: nil)
     }
     
+    
+}
+
+extension EditViewController: UITextFieldDelegate {
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        
+        textField.resignFirstResponder()
+    }
 }
 
 extension EditViewController: UITableViewDelegate,UITableViewDataSource {
@@ -85,6 +96,7 @@ extension EditViewController: UITableViewDelegate,UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = self.tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! FirstCustomCell
+        cell.textField.delegate = self
         cell.textField.backgroundColor = .clear
         cell.backgroundColor = .secondarySystemBackground
         

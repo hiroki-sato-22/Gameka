@@ -27,6 +27,7 @@ class EditTaskViewController: UIViewController {
         view.backgroundColor = .systemBackground
         setTableView()
         isModalInPresentation = true
+        hideKeyboardWhenTappedAround()
     }
     
     func setTableView() {
@@ -107,23 +108,19 @@ extension EditTaskViewController: UIPickerViewDelegate,UIPickerViewDataSource {
     
     func pickerView( _ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         
-//        if row == 0 {
-//            pickerData = 1
-//        } else if row == 1 {
-//            pickerData = 2
-//        } else if row == 2 {
-//            pickerData = 3
-//        } else if row == 3 {
-//            pickerData = 4
-//        } else if row == 4 {
-//            pickerData = 5
-//        }
-        
         pickerValue = dataList[row]
 
         
     }
     
+}
+
+extension EditTaskViewController: UITextFieldDelegate {
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        
+        textField.resignFirstResponder()
+    }
 }
 
 extension EditTaskViewController: UITableViewDelegate,UITableViewDataSource {
@@ -138,6 +135,8 @@ extension EditTaskViewController: UITableViewDelegate,UITableViewDataSource {
             let cell = tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! FirstCustomCell
             cell.selectionStyle = UITableViewCell.SelectionStyle.none
             cell.backgroundColor = .secondarySystemBackground
+            cell.textField.delegate = self
+
             return cell
         }
         else {
