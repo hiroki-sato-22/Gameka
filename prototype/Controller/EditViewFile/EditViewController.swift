@@ -12,6 +12,8 @@ class EditViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
     
+    let util = Util()
+    
     let realm = try! Realm()
     var categories: Results<Category>?
     
@@ -26,31 +28,12 @@ class EditViewController: UIViewController {
     func setTalbeView() {
         tableView.delegate = self
         tableView.dataSource = self
-//        tableView.rowHeight = UITableView.automaticDimension
-        tableView.rowHeight = 60
+        tableView.rowHeight = view.bounds.height / 9
         tableView.isScrollEnabled = false
         tableView.backgroundColor = .clear
         tableView.register(UINib(nibName: "FirstCustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
     }
     
-    
-    func save(category: Category) {
-        do {
-            try realm.write {
-                realm.add(category)
-            }
-        } catch {
-            print("Error saving category \(error)")
-        }
-    }
-    
-    func displayMyAlertMessage(userMessage:String){
-        
-        let myAlert = UIAlertController(title: "入力内容を確認してください", message: userMessage, preferredStyle: UIAlertController.Style.alert)
-        let okAction = UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: nil)
-        myAlert.addAction(okAction)
-        self.present(myAlert, animated: true, completion: nil)
-    }
     
     @IBAction func back(_ sender: Any) {
         dismiss(animated: true, completion: nil)
@@ -69,10 +52,9 @@ class EditViewController: UIViewController {
         }
         
         newCategory.name = cell.textField.text!
+        util.saveCategory(category: newCategory)
 
-        self.save(category: newCategory)
-        
-        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "load"), object: nil)
+        util.load()
         
         self.dismiss(animated: true, completion: nil)
     }

@@ -15,7 +15,6 @@ class ListViewController: UIViewController,UITextFieldDelegate {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var pointLabel: UIBarButtonItem!
     @IBOutlet weak var addButton: UIBarButtonItem!
-//    @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
     
     let coachMarksController = CoachMarksController()
     var currentPoint = 0
@@ -33,7 +32,7 @@ class ListViewController: UIViewController,UITextFieldDelegate {
         super.viewDidLoad()
         setTableView()
         view.backgroundColor = .systemBackground
-        NotificationCenter.default.addObserver(self, selector: #selector(loadList), name: NSNotification.Name(rawValue: "load"), object: nil)
+        notifi()
         self.coachMarksController.dataSource = self
         setSearchController()
     }
@@ -64,7 +63,6 @@ class ListViewController: UIViewController,UITextFieldDelegate {
 //        tableView.rowHeight = view.frame.height / 9
         tableView.rowHeight = UITableView.automaticDimension
         tableView.register(UINib(nibName: "CustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
-//        tableView.register(UINib(nibName: "InfoCell", bundle: nil), forCellReuseIdentifier: "infoCell")
         tableView.separatorStyle = .none
     }
     
@@ -78,7 +76,7 @@ class ListViewController: UIViewController,UITextFieldDelegate {
         }
     }
     
-    @objc func loadList(notification: NSNotification){
+    @objc override func loadList(notification: NSNotification){
         //load data here
         self.tableView.reloadData()
         let savedNumber = userDefaults.integer(forKey: "currentValue")
@@ -174,7 +172,6 @@ extension ListViewController: UITableViewDelegate,UITableViewDataSource {
         cell.colorView.layer.cornerRadius = 20
         
         let color = UIColor.systemTeal
-        
         if let colour = color.darken(byPercentage: CGFloat(indexPath.row) / CGFloat(toDoItems!.count)) {
             cell.colorView.backgroundColor = colour
             cell.icon.tintColor = ContrastColorOf(colour, returnFlat: true)
@@ -222,9 +219,7 @@ extension ListViewController: UISearchResultsUpdating{
         if searchController.searchBar.text?.count == 0 {
             loadItems()
             tableView.reloadData()
-            //            DispatchQueue.main.async {
-            //                searchBar.resignFirstResponder()
-            //            }
+            
         }
     }
     

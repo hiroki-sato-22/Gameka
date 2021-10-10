@@ -22,6 +22,7 @@ class SettingViewController: UIViewController {
         tableView.dataSource = self
         tableView.isScrollEnabled = false
         tableView.backgroundColor = .systemBackground
+        tableView.rowHeight = UITableView.automaticDimension
         tableView.register(UINib(nibName: "SettingTableViewCell", bundle: nil), forCellReuseIdentifier: "customCell2")
     }
     
@@ -92,17 +93,16 @@ extension SettingViewController: UITableViewDelegate,UITableViewDataSource {
         if indexPath.section == 0 {
             return
         }else if indexPath.row == 0 {
-            
-            let url = NSURL(string: "https://hiroki-sato-dev.hatenablog.com/entry/2021/08/08/105747")
-            if UIApplication.shared.canOpenURL(url! as URL) {
-                UIApplication.shared.open(url! as URL, options: [:], completionHandler: nil)
-            }
+            setUrl(urlString: "https://hiroki-sato-dev.hatenablog.com/entry/2021/08/08/105747")
         }else {
-            
-            let url = NSURL(string: "https://twitter.com/sato91939961")
-            if UIApplication.shared.canOpenURL(url! as URL) {
-                UIApplication.shared.open(url! as URL, options: [:], completionHandler: nil)
-            }
+            setUrl(urlString: "https://twitter.com/sato91939961")
+        }
+    }
+    
+    func setUrl(urlString: String) {
+        let url = NSURL(string: urlString)
+        if UIApplication.shared.canOpenURL(url! as URL) {
+            UIApplication.shared.open(url! as URL, options: [:], completionHandler: nil)
         }
     }
     

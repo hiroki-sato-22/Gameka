@@ -18,18 +18,19 @@ class SettingTableViewCell: UITableViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
-        
         uiSwitch.isOn = userDefaults.bool(forKey: "mySwitchValue")
     }
     
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-        
-    }
+//    override func setSelected(_ selected: Bool, animated: Bool) {
+//        super.setSelected(selected, animated: animated)
+//
+//    }
     
     @IBAction func switchPressed(_ sender: Any) {
-        
+        changeDarkMode(sender)
+    }
+    
+    func changeDarkMode(_ sender: Any){
         if ( (sender as AnyObject).isOn ) {
             DarkisOn = true
             userDefaults.setValue(DarkisOn, forKey: "darkIsOn")
@@ -40,7 +41,6 @@ class SettingTableViewCell: UITableViewCell {
             window?.overrideUserInterfaceStyle = .light
         }
         
-        print(DarkisOn)
         userDefaults.set((sender as AnyObject).isOn, forKey: "mySwitchValue")
     }
     

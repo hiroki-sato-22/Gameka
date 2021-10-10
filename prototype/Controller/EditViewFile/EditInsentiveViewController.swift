@@ -12,6 +12,8 @@ class EditInsentiveViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
     
+    let util = Util()
+    
     let dataList = [Int](arrayLiteral: 1,2,3,4,5)
     var pickerValue:Int = 1
     let realm = try! Realm()
@@ -28,49 +30,29 @@ class EditInsentiveViewController: UIViewController {
     func setTalbeView() {
         tableView.delegate = self
         tableView.dataSource = self
-        tableView.rowHeight = 60
+        tableView.rowHeight = view.bounds.height / 9
         tableView.isScrollEnabled = false
         tableView.register(UINib(nibName: "FirstCustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
         tableView.register(UINib(nibName: "PickerViewCell", bundle: nil), forCellReuseIdentifier: "customCell2")
     }
     
-    func save(insentive: Insentive) {
-        do {
-            try realm.write {
-                realm.add(insentive)
-            }
-        } catch {
-            print("Error saving category \(error)")
-        }
-    }
-    
-    func displayMyAlertMessage(userMessage:String){
-        
-        let myAlert = UIAlertController(title: "入力内容を確認してください", message: userMessage, preferredStyle: UIAlertController.Style.alert)
-        let okAction = UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: nil)
-        myAlert.addAction(okAction)
-        self.present(myAlert, animated: true, completion: nil)
-    }
-    
-    // MARK: - action
-    @IBAction func done(_ sender: Any) {
+    @IBAction func addButtonPressed(_ sender: Any) {
         
         let index = IndexPath(row: 0, section: 0)
         let cell = self.tableView.cellForRow(at: index) as! FirstCustomCell
         
-        let newCategory = Insentive()
+        let newInsentive = Insentive()
         
         guard let text = cell.textField.text, !text.isEmpty else {
             displayMyAlertMessage(userMessage: "ご褒美を入力してください")
             return
         }
         
-        newCategory.title = cell.textField.text!
-        newCategory.point = pickerValue
+        newInsentive.title = cell.textField.text!
+        newInsentive.point = pickerValue
         
-        self.save(insentive: newCategory)
-        
-        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "load"), object: nil)
+        util.saveInsentive(insentive: newInsentive)
+        util.load()
         dismiss(animated: true, completion: nil)
     }
     
@@ -122,6 +104,7 @@ extension EditInsentiveViewController: UITableViewDelegate,UITableViewDataSource
             cell.selectionStyle = UITableViewCell.SelectionStyle.none
             cell.backgroundColor = .secondarySystemBackground
             cell.textField.delegate = self
+            cell.textField.placeholder = "ご褒美"
             return cell
         }
         else {

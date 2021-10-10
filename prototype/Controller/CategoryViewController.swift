@@ -29,7 +29,7 @@ class CategoryViewController: UIViewController{
         setTableView()
         loadCategories()
         view.backgroundColor = .systemBackground
-        NotificationCenter.default.addObserver(self, selector: #selector(loadList), name: NSNotification.Name(rawValue: "load"), object: nil)
+        notifi()
         self.coachMarksController.dataSource = self
         setSearchController()
     }
@@ -56,12 +56,12 @@ class CategoryViewController: UIViewController{
         tableView.delegate = self
         tableView.dataSource = self
         tableView.keyboardDismissMode = .onDrag
-//        tableView.rowHeight = view.frame.height / 10
         tableView.rowHeight = UITableView.automaticDimension
         tableView.separatorStyle = .none
         tableView.register(UINib(nibName: "CustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
     }
     
+    //継承
     func firstLaunch() {
         let launchCategory = userDefaults.bool(forKey: "launchCategory")
         if launchCategory {
@@ -72,27 +72,15 @@ class CategoryViewController: UIViewController{
         }
     }
     
-    @objc func loadList(notification: NSNotification){
+    @objc override func loadList(notification: NSNotification){
         //load data here
         self.tableView.reloadData()
         let savedNumber = userDefaults.integer(forKey: "currentValue")
         pointLabel.title = String(savedNumber)
     }
     
-    
-    func save(category: Category) {
-        do {
-            try realm.write {
-                realm.add(category)
-            }
-        } catch {
-            print("Error saving category \(error)")
-        }
-        tableView.reloadData()
-    }
-    
+    //継承
     func loadCategories() {
-        
         categories = realm.objects(Category.self)
         tableView.reloadData()
     }
@@ -136,6 +124,7 @@ class CategoryViewController: UIViewController{
         }
     }
     
+    
 }
 
 extension CategoryViewController: UITableViewDelegate,UITableViewDataSource {
@@ -146,27 +135,30 @@ extension CategoryViewController: UITableViewDelegate,UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        
         let cell = self.tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! CustomCell
         cell.label.text = categories?[indexPath.row].name ?? "No Categories added yet"
         cell.pointLabel.isHidden = true
         cell.selectionStyle = UITableViewCell.SelectionStyle.none
         
         let color = UIColor.systemTeal
-        
         if let colour = color.darken(byPercentage: CGFloat(indexPath.row) / CGFloat(categories!.count)) {
             cell.backgroundColor = colour
             cell.icon.tintColor = ContrastColorOf(colour, returnFlat: true)
             cell.label.textColor = ContrastColorOf(colour, returnFlat: true)
         }
         
+        removeUnderLine(indexPath: indexPath, cell: cell)
+        return cell
+        
+        
+    }
+    
+    
+    func removeUnderLine(indexPath: IndexPath, cell: UITableViewCell){
         let lastRowIndex = tableView.numberOfRows(inSection: tableView.numberOfSections-1)
         if (indexPath.row == lastRowIndex - 1) {
             cell.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: .greatestFiniteMagnitude)
         }
-        return cell
-        
-        
     }
     
     
@@ -196,9 +188,6 @@ extension CategoryViewController: UISearchResultsUpdating{
         
         if searchController.searchBar.text?.count == 0 {
             loadCategories()
-            //            DispatchQueue.main.async {
-            //                searchBar.resignFirstResponder()
-            //            }
         }
     }
     
@@ -248,16 +237,3 @@ extension CategoryViewController: CoachMarksControllerDataSource, CoachMarksCont
     }
 }
 
-extension UIViewController {
-    func hideKeyboardWhenTappedAround() {
-        let tapGesture = UITapGestureRecognizer(target: self,
-                                                action: #selector(hideKeyboard))
-        view.addGestureRecognizer(tapGesture)
-        tapGesture.cancelsTouchesInView = false
-    }
-    
-    @objc func hideKeyboard() {
-        view.endEditing(true)
-        
-    }
-}

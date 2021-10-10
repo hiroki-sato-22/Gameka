@@ -9,10 +9,8 @@ import UIKit
 
 class FirstCustomCell: UITableViewCell {
 
-    
     @IBOutlet weak var textField: UITextField!
 
-    
     override func awakeFromNib() {
         super.awakeFromNib()
         

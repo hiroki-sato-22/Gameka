@@ -12,6 +12,8 @@ class EditTaskViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
     
+    let util = Util()
+    
     let dataList = [Int](arrayLiteral: 1,2,3,4,5)
     var pickerValue:Int = 1
     var toDoItems: Results<Item>?
@@ -34,7 +36,7 @@ class EditTaskViewController: UIViewController {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.isScrollEnabled = false
-        tableView.rowHeight = 60
+        tableView.rowHeight = view.bounds.height / 9
         tableView.backgroundColor = .systemBackground
         tableView.register(UINib(nibName: "FirstCustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
         tableView.register(UINib(nibName: "PickerViewCell", bundle: nil), forCellReuseIdentifier: "customCell2")
@@ -45,20 +47,12 @@ class EditTaskViewController: UIViewController {
     }
     
     
-    func displayMyAlertMessage(userMessage:String){
-        
-        let myAlert = UIAlertController(title: "入力内容を確認してください", message: userMessage, preferredStyle: UIAlertController.Style.alert)
-        let okAction = UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: nil)
-        myAlert.addAction(okAction)
-        self.present(myAlert, animated: true, completion: nil)
-    }
-    
     @IBAction func back(_ sender: Any) {
         
         self.dismiss(animated: true, completion: nil)
     }
     
-    @IBAction func done(_ sender: Any) {
+    @IBAction func addButtonPressed(_ sender: Any) {
         
         let index = IndexPath(row: 0, section: 0)
         let cell = self.tableView.cellForRow(at: index) as! FirstCustomCell
@@ -70,6 +64,7 @@ class EditTaskViewController: UIViewController {
                     //空判定
                     guard let text = cell.textField.text, !text.isEmpty else {
                         displayMyAlertMessage(userMessage: "タスクを入力してください")
+                        
                         return
                     }
                     
@@ -80,7 +75,7 @@ class EditTaskViewController: UIViewController {
                     currentCategory.items.append(newItem)
                     
                     self.dismiss(animated: true, completion: nil)
-                    NotificationCenter.default.post(name: NSNotification.Name(rawValue: "load"), object: nil)
+                    util.load()
                 }
             } catch {
                 print("Error saving new items, \(error)")
@@ -109,7 +104,7 @@ extension EditTaskViewController: UIPickerViewDelegate,UIPickerViewDataSource {
     func pickerView( _ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         
         pickerValue = dataList[row]
-
+        
         
     }
     
@@ -136,7 +131,8 @@ extension EditTaskViewController: UITableViewDelegate,UITableViewDataSource {
             cell.selectionStyle = UITableViewCell.SelectionStyle.none
             cell.backgroundColor = .secondarySystemBackground
             cell.textField.delegate = self
-
+            cell.textField.placeholder = "タスク名"
+            
             return cell
         }
         else {
@@ -148,6 +144,7 @@ extension EditTaskViewController: UITableViewDelegate,UITableViewDataSource {
             
             return cell
         }
+        
         
     }
 }

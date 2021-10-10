@@ -10,7 +10,9 @@ import UIKit
 class EditPointViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
-        
+    
+    let util = Util()
+    
     let array = [Int](0...200)
     let userDefaults = UserDefaults.standard
     var pickerValue:Int = 1
@@ -24,16 +26,20 @@ class EditPointViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        setPickerView()
+    }
+    
+    func setPickerView() {
         let index = IndexPath(row: 0, section: 0)
         let cell = self.tableView.cellForRow(at: index) as! LargePickerCell
-        cell.picker.selectRow(Int(pickerValue - 1), inComponent: 0, animated: true)
+        cell.picker.selectRow(Int(pickerValue), inComponent: 0, animated: true)
     }
     
     
     func setTableView() {
         tableView.delegate = self
         tableView.dataSource = self
-//        tableView.rowHeight = 100
+        tableView.rowHeight = view.bounds.height / 4
         tableView.backgroundColor = .systemBackground
         tableView.isScrollEnabled = false
         tableView.tableFooterView = UIView()
@@ -41,15 +47,13 @@ class EditPointViewController: UIViewController {
     }
     
     
-    
-    // MARK: - objc Action
     @objc func doneAction(){
         let index = IndexPath(row: 0, section: 0)
         let cell = self.tableView.cellForRow(at: index) as! FirstCustomCell
         var savedNumber = UserDefaults.standard.integer(forKey: "currentValue")
         //textFieldをtapで編集して値をsavedNUmberに入れる
         guard let text = cell.textField.text, !text.isEmpty else {
-            self.displayMyAlertMessage(userMessage: "ポイントを入力してください")
+            displayMyAlertMessage(userMessage: "ポイントを入力してください")
             return
         }
         
@@ -59,25 +63,14 @@ class EditPointViewController: UIViewController {
         cell.textField.resignFirstResponder()
     }
     
-  
-    func displayMyAlertMessage(userMessage:String){
-        
-        let myAlert = UIAlertController(title: "入力内容を確認してください", message: userMessage, preferredStyle: UIAlertController.Style.alert)
-        let okAction = UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: nil)
-        myAlert.addAction(okAction)
-        self.present(myAlert, animated: true, completion: nil)
-    }
-    
-    @IBAction func done(_ sender: Any) {
+    @IBAction func addButtonPressed(_ sender: Any) {
         
         userDefaults.set(pickerValue, forKey: "currentValue")
-        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "load"), object: nil)
+        util.load()
         dismiss(animated: true, completion: nil)
     }
     
     @IBAction func back(_ sender: Any) {
-        
-        
         dismiss(animated: true, completion: nil)
     }
     

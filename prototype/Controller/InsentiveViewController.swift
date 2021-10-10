@@ -12,7 +12,6 @@ import ChameleonFramework
 
 class InsentiveViewController: UIViewController {
     
-    @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
     @IBOutlet weak var addButton: UIBarButtonItem!
     @IBOutlet weak var pointLabel: UIBarButtonItem!
     @IBOutlet weak var tableView: UITableView!
@@ -23,14 +22,14 @@ class InsentiveViewController: UIViewController {
     var insentives: Results<Insentive>?
     var currentPoint = 0
     let searchController = UISearchController(searchResultsController: nil)
-
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         loadInsentives()
         setTableView()
-        NotificationCenter.default.addObserver(self, selector: #selector(loadList), name: NSNotification.Name(rawValue: "load"), object: nil)
+        notifi()
         self.coachMarksController.dataSource = self
         setSearchController()
     }
@@ -56,12 +55,12 @@ class InsentiveViewController: UIViewController {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.keyboardDismissMode = .onDrag
+        tableView.rowHeight = UITableView.automaticDimension
         tableView.register(UINib(nibName: "CustomCell", bundle: nil), forCellReuseIdentifier: "customCell")
-//        tableView.register(UINib(nibName: "InfoCell", bundle: nil), forCellReuseIdentifier: "infoCell")
         tableView.separatorStyle = .none
     }
     
-    @objc func loadList(notification: NSNotification){
+    @objc override func loadList(notification: NSNotification){
         //load data here
         self.tableView.reloadData()
         let savedNumber = userDefaults.integer(forKey: "currentValue")
@@ -82,9 +81,9 @@ class InsentiveViewController: UIViewController {
             self.coachMarksController.start(in: .window(over: self))
         }
     }
-   
+    
     func Calculation(for indexPath: IndexPath) {
-
+        
         if let item = insentives?[indexPath.row] {
             let savedNumber = userDefaults.integer(forKey: "currentValue")
             currentPoint = savedNumber - item.point
@@ -106,22 +105,8 @@ class InsentiveViewController: UIViewController {
         }
     }
     
-    
-    func save(insentive: Insentive) {
-        do {
-            try realm.write {
-                realm.add(insentive)
-            }
-        } catch {
-            print("Error saving category \(error)")
-        }
-        tableView.reloadData()
-    }
-    
-    
-    
     func showDeleteWarning(for indexPath: IndexPath) {
-
+        
         let alert = UIAlertController(title: "ご褒美を実行しますか？", message: "OKを選択すると所持ポイントから減算されます", preferredStyle: .alert)
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
         let deleteAction = UIAlertAction(title: "OK", style: .destructive) { _ in
@@ -156,25 +141,23 @@ class InsentiveViewController: UIViewController {
     
 }
 
-// MARK: - tableView delegate
 extension InsentiveViewController: UITableViewDelegate,UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-
-            return insentives?.count ?? 1
+        
+        return insentives?.count ?? 1
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! CustomCell
-            cell.selectionStyle = UITableViewCell.SelectionStyle.none
-            if let item = insentives?[indexPath.row] {
-                
-                cell.label.text = item.title
-                cell.pointLabel.text = String(item.point)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! CustomCell
+        cell.selectionStyle = UITableViewCell.SelectionStyle.none
+        if let item = insentives?[indexPath.row] {
+            
+            cell.label.text = item.title
+            cell.pointLabel.text = String(item.point)
         }
         
         let color = UIColor.systemTeal
-        
         if let colour = color.darken(byPercentage: CGFloat(indexPath.row) / CGFloat(insentives!.count)) {
             cell.backgroundColor = colour
             cell.icon.tintColor = ContrastColorOf(colour, returnFlat: true)
@@ -186,18 +169,18 @@ extension InsentiveViewController: UITableViewDelegate,UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    
-            showDeleteWarning(for: indexPath)
-            tableView.reloadData()
-            tableView.deselectRow(at: indexPath, animated: true)
+        
+        showDeleteWarning(for: indexPath)
+        tableView.reloadData()
+        tableView.deselectRow(at: indexPath, animated: true)
     }
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         
-            if editingStyle == UITableViewCell.EditingStyle.delete {
-                updateModel(at: indexPath)
-                tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.automatic)
-            }
+        if editingStyle == UITableViewCell.EditingStyle.delete {
+            updateModel(at: indexPath)
+            tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.automatic)
+        }
     }
     
 }
@@ -211,9 +194,7 @@ extension InsentiveViewController: UISearchResultsUpdating{
         
         if searchController.searchBar.text?.count == 0 {
             loadInsentives()
-            //            DispatchQueue.main.async {
-            //                searchBar.resignFirstResponder()
-            //            }
+            
         }
     }
     

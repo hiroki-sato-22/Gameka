@@ -109,7 +109,7 @@
                         </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" title="追加" id="YUL-UT-X5t">
                             <connections>
-                                <action selector="done:" destination="gE7-o7-Kpc" id="R3M-dE-QmX"/>
+                                <action selector="addButtonPressed:" destination="gE7-o7-Kpc" id="G1u-rn-785"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -176,7 +176,6 @@
                         <outlet property="addButton" destination="8AQ-VJ-BaM" id="nSE-T0-EyG"/>
                         <outlet property="pointLabel" destination="ADZ-tt-cs4" id="g7z-rL-8mZ"/>
                         <outlet property="tableView" destination="v5L-FR-rNq" id="Jfi-LQ-voA"/>
-                        <outlet property="tableViewHeight" destination="JNW-JC-id2" id="ujb-aS-mP6"/>
                         <segue destination="2Zl-Rz-trQ" kind="presentation" identifier="goToEditSmallTasks" id="tHP-Ce-L2Z"/>
                         <segue destination="Plb-DN-l5v" kind="presentation" identifier="goToEditPoint" id="bA3-2e-cJw"/>
                     </connections>
@@ -244,7 +243,7 @@
                         </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" title="完了" id="9dV-fW-2z3">
                             <connections>
-                                <action selector="done:" destination="qOn-od-auw" id="5EQ-3v-jaO"/>
+                                <action selector="addButtonPressed:" destination="qOn-od-auw" id="4xJ-ia-tJH"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -337,7 +336,6 @@
                         <outlet property="addButton" destination="A6r-RW-tFR" id="Ruo-UA-n24"/>
                         <outlet property="pointLabel" destination="bKn-xz-bHp" id="9ei-Zl-9I7"/>
                         <outlet property="tableView" destination="rO3-2r-ZnT" id="iYB-zd-zr6"/>
-                        <outlet property="tableViewHeight" destination="7nc-aI-ZkM" id="1rI-Au-DKS"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="i0m-xe-nra" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -392,7 +390,7 @@
                         </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" title="追加" id="lSC-rV-5RT">
                             <connections>
-                                <action selector="done:" destination="5N6-a5-cVd" id="whu-Vo-zTP"/>
+                                <action selector="addButtonPressed:" destination="5N6-a5-cVd" id="5Z0-9a-7tP"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -437,6 +435,7 @@
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="insetGrouped" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="18" sectionFooterHeight="18" translatesAutoresizingMaskIntoConstraints="NO" id="ug0-9L-Qna">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="szZ-Hb-VKl" customClass="CustomViewCell" customModule="prototype" customModuleProvider="target">
                                         <rect key="frame" x="20" y="32" width="374" height="43.5"/>
